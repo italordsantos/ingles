@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocabulary Builder - Construtor de Vocabulário IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
+        
+        .card-flip {
+            perspective: 1000px;
+            cursor: pointer;
+        }
+        
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        
+        .card-flip.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .word-mastered {
+            animation: masteredGlow 2s ease-in-out;
+        }
+        
+        @keyframes masteredGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.5); }
+            50% { box-shadow: 0 0 30px rgba(34, 197, 94, 0.8), 0 0 40px rgba(34, 197, 94, 0.6); }
+        }
+        
+        .streak-fire {
+            animation: fireFlicker 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes fireFlicker {
+            0%, 100% { transform: scale(1) rotate(-2deg); }
+            50% { transform: scale(1.1) rotate(2deg); }
+        }
+        
+        .xp-gain {
+            animation: xpFloat 2s ease-out forwards;
+        }
+        
+        @keyframes xpFloat {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.2); opacity: 0; }
+        }
+        
+        .level-up {
+            animation: levelUpBurst 1.5s ease-out;
+        }
+        
+        @keyframes levelUpBurst {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .progress-ring {
+            transition: stroke-dasharray 0.5s ease;
+        }
+        
+        .difficulty-easy { border-left: 4px solid #22c55e; }
+        .difficulty-medium { border-left: 4px solid #f59e0b; }
+        .difficulty-hard { border-left: 4px solid #ef4444; }
+        .difficulty-expert { border-left: 4px solid #8b5cf6; }
+        
+        .memory-strength-1 { background: linear-gradient(135deg, #fee2e2, #fecaca); }
+        .memory-strength-2 { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+        .memory-strength-3 { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+        .memory-strength-4 { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+        .memory-strength-5 { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); }
+        
+        .word-connection {
+            animation: connectionPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes connectionPulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+        
+        .spaced-repetition {
+            background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+        }
+        
+        .brain-wave {
+            animation: brainWave 3s ease-in-out infinite;
+        }
+        
+        @keyframes brainWave {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .pulse-animation {
+            animation: gentlePulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes gentlePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3); }
+            50% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 min-h-screen text-white">
+    <!-- Header -->
+    <header class="gradient-bg shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors">
+                        <span class="text-xl">←</span>
+                    </button>
+                    <div>
+                        <h1 class="text-3xl font-black flex items-center">
+                            🧠 VOCABULARY BUILDER
+                        </h1>
+                        <p class="text-purple-100">Sistema Inteligente de Vocabulário</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <!-- Daily Streak -->
+                    <div class="text-center">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-2xl streak-fire">🔥</span>
+                            <span class="text-2xl font-bold" id="streak-count">12</span>
+                        </div>
+                        <div class="text-xs text-purple-100">Dias</div>
+                    </div>
+                    
+                    <!-- XP and Level -->
+                    <div class="text-center">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xl">⭐</span>
+                            <div>
+                                <div class="text-lg font-bold" id="user-level">Nível 8</div>
+                                <div class="text-xs text-purple-100" id="xp-display">2,450 XP</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Words Learned -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold" id="words-learned">347</div>
+                        <div class="text-xs text-purple-100">Palavras</div>
+                    </div>
+                    
+                    <!-- Retention Rate -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-400" id="retention-rate">94%</div>
+                        <div class="text-xs text-purple-100">Retenção</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Main Dashboard -->
+        <div id="main-dashboard">
+            <!-- Learning Modes -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold mb-6 text-center">Modos de Aprendizado</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Spaced Repetition -->
+                    <div class="spaced-repetition rounded-3xl p-6 cursor-pointer transform hover:scale-105 transition-all" onclick="startSpacedRepetition()">
+                        <div class="text-center">
+                            <div class="text-5xl mb-4 brain-wave">🧠</div>
+                            <h3 class="text-xl font-bold mb-2">Repetição Espaçada</h3>
+                            <p class="text-blue-100 text-sm mb-4">Algoritmo científico de memorização</p>
+                            <div class="bg-blue-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold">
+                                23 palavras prontas
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- New Words -->
+                    <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-3xl p-6 cursor-pointer transform hover:scale-105 transition-all" onclick="learnNewWords()">
+                        <div class="text-center">
+                            <div class="text-5xl mb-4">🌱</div>
+                            <h3 class="text-xl font-bold mb-2">Palavras Novas</h3>
+                            <p class="text-green-100 text-sm mb-4">Expanda seu vocabulário</p>
+                            <div class="bg-green-400 text-green-900 px-3 py-1 rounded-full text-xs font-bold">
+                                +50 XP por palavra
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Context Learning -->
+                    <div class="bg-gradient-to-br from-purple-500 to-violet-600 rounded-3xl p-6 cursor-pointer transform hover:scale-105 transition-all" onclick="contextLearning()">
+                        <div class="text-center">
+                            <div class="text-5xl mb-4">📖</div>
+                            <h3 class="text-xl font-bold mb-2">Contexto</h3>
+                            <p class="text-purple-100 text-sm mb-4">Aprenda com histórias</p>
+                            <div class="bg-purple-400 text-purple-900 px-3 py-1 rounded-full text-xs font-bold">
+                                IMERSIVO
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Word Games -->
+                    <div class="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-3xl p-6 cursor-pointer transform hover:scale-105 transition-all" onclick="wordGames()">
+                        <div class="text-center">
+                            <div class="text-5xl mb-4">🎮</div>
+                            <h3 class="text-xl font-bold mb-2">Jogos</h3>
+                            <p class="text-yellow-100 text-sm mb-4">Diversão e aprendizado</p>
+                            <div class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
+                                MULTIPLAYER
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Today's Progress -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+                <!-- Progress Overview -->
+                <div class="lg:col-span-2 bg-white/10 backdrop-blur-lg rounded-3xl p-8">
+                    <h3 class="text-2xl font-bold mb-6">Progresso de Hoje</h3>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-400" id="words-today">12</div>
+                            <div class="text-sm text-gray-300">Novas Palavras</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-blue-400" id="reviews-today">45</div>
+                            <div class="text-sm text-gray-300">Revisões</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-purple-400" id="accuracy-today">89%</div>
+                            <div class="text-sm text-gray-300">Precisão</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-yellow-400" id="time-today">28m</div>
+                            <div class="text-sm text-gray-300">Tempo</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Weekly Goal Progress -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">Meta Semanal: 50 palavras</span>
+                            <span class="text-sm text-gray-300">34/50</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full" style="width: 68%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Learning Streak Calendar -->
+                    <div>
+                        <h4 class="font-semibold mb-3">Sequência de Aprendizado</h4>
+                        <div class="grid grid-cols-7 gap-2">
+                            <!-- Calendar days will be generated here -->
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-xs font-bold">S</div>
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-xs font-bold">M</div>
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-xs font-bold">T</div>
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-xs font-bold">W</div>
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-xs font-bold">T</div>
+                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center text-xs font-bold">F</div>
+                            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-xs font-bold">S</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI Insights -->
+                <div class="space-y-6">
+                    <!-- Personalized Tip -->
+                    <div class="bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-2xl p-6">
+                        <h4 class="font-bold mb-4 flex items-center">
+                            🤖 Insight da IA
+                        </h4>
+                        <p class="text-sm mb-4">
+                            Você tem 85% de retenção em palavras relacionadas a tecnologia, mas apenas 67% em verbos irregulares. Recomendo focar nos verbos hoje.
+                        </p>
+                        <button class="bg-cyan-500 hover:bg-cyan-600 px-4 py-2 rounded-lg text-sm font-bold transition-all">
+                            Estudar Verbos
+                        </button>
+                    </div>
+                    
+                    <!-- Memory Strength -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4">Força da Memória</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Substantivos</span>
+                                <div class="flex space-x-1">
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-gray-600 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Adjetivos</span>
+                                <div class="flex space-x-1">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-gray-600 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-gray-600 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm">Verbos</span>
+                                <div class="flex space-x-1">
+                                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-gray-600 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-gray-600 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-gray-600 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Next Review -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4">Próxima Revisão</h4>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold mb-2">15:30</div>
+                            <div class="text-sm text-gray-300 mb-4">8 palavras prontas</div>
+                            <button class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg font-bold text-sm transition-all">
+                                Revisar Agora
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Words -->
+            <div class="mb-12">
+                <h3 class="text-2xl font-bold mb-6">Palavras Recentes</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Word cards will be generated here -->
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div>
+                <h3 class="text-2xl font-bold mb-6">Conquistas Recentes</h3>
+                <div class="flex space-x-4 overflow-x-auto pb-4">
+                    <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl p-4 min-w-[200px] text-center">
+                        <div class="text-3xl mb-2">🏆</div>
+                        <h4 class="font-bold text-yellow-900">Vocabulary Master</h4>
+                        <p class="text-xs text-yellow-800">300+ palavras aprendidas</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-4 min-w-[200px] text-center">
+                        <div class="text-3xl mb-2">🧠</div>
+                        <h4 class="font-bold text-blue-900">Memory Champion</h4>
+                        <p class="text-xs text-blue-800">95%+ retenção por 7 dias</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-4 min-w-[200px] text-center">
+                        <div class="text-3xl mb-2">🔥</div>
+                        <h4 class="font-bold text-purple-900">Streak Legend</h4>
+                        <p class="text-xs text-purple-800">10+ dias consecutivos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Learning Interface (Hidden Initially) -->
+        <div id="learning-interface" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Main Learning Area -->
+                <div class="lg:col-span-3">
+                    <!-- Progress Bar -->
+                    <div class="mb-8">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-2xl font-bold" id="session-title">Repetição Espaçada</h3>
+                            <div class="text-lg font-semibold">
+                                <span id="current-card">1</span>/<span id="total-cards">23</span>
+                            </div>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all" id="session-progress" style="width: 4%"></div>
+                        </div>
+                    </div>
+
+
+
+                    <!-- Flashcard -->
+                    <div class="card-flip mb-8" id="flashcard" onclick="flipCard()">
+                        <div class="card-inner h-96">
+                            <div class="card-front bg-gradient-to-br from-blue-600 to-purple-600 p-8">
+                                <div class="text-center h-full flex flex-col justify-center">
+                                    <div class="text-7xl font-black mb-6" id="word-front">SERENDIPITY</div>
+                                    <div class="text-xl text-blue-100 mb-2" id="word-type">substantivo</div>
+                                    <div class="text-sm text-blue-200 mb-4 italic" id="word-usage">"It was pure serendipity that led to this discovery"</div>
+                                    <div class="text-lg text-blue-200" id="word-pronunciation">/ˌserənˈdɪpɪti/</div>
+                                    <div class="text-sm text-blue-200 mt-8 pulse-animation">Clique para ver a definição</div>
+                                </div>
+                            </div>
+                            <div class="card-back bg-gradient-to-br from-green-600 to-emerald-600 p-8">
+                                <div class="text-center h-full flex flex-col justify-center">
+                                    <div class="text-4xl font-black mb-4" id="word-back">SERENDIPITY</div>
+                                    <div class="text-2xl font-bold mb-6 text-green-100" id="word-definition">
+                                        Uma descoberta feliz e inesperada
+                                    </div>
+                                    <div class="text-lg text-green-200 mb-4" id="word-translation">
+                                        "Serendipidade" em português
+                                    </div>
+                                    <div class="text-green-100 text-lg" id="word-example">
+                                        💬 "Finding this job was pure serendipity."
+                                    </div>
+                                    <div class="text-sm text-green-200 mt-4">
+                                        "Encontrar este emprego foi pura serendipidade."
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div id="show-definition-section">
+                        <div class="text-center">
+                            <div class="text-lg font-semibold mb-4">Clique no card para ver a definição</div>
+                            <div class="text-sm text-gray-300 mb-6">Depois avalie o quão bem você lembrou da palavra</div>
+                        </div>
+                    </div>
+
+                    <!-- Answer Buttons (Hidden Initially) -->
+                    <div class="hidden" id="answer-buttons">
+                        <div class="text-center mb-6">
+                            <div class="text-xl font-bold mb-2">Como foi sua lembrança?</div>
+                            <div class="text-sm text-gray-300">Escolha baseado na dificuldade que teve para lembrar</div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <button onclick="answerCard('again')" class="bg-red-600 hover:bg-red-700 py-6 rounded-2xl font-bold transition-all transform hover:scale-105">
+                                <div class="text-3xl mb-2">😵</div>
+                                <div class="text-lg mb-1">Não Lembrei</div>
+                                <div class="text-xs text-red-200 mb-2">Esqueci completamente</div>
+                                <div class="text-xs bg-red-500 px-2 py-1 rounded">Revisar em 1 min</div>
+                            </button>
+                            <button onclick="answerCard('hard')" class="bg-orange-600 hover:bg-orange-700 py-6 rounded-2xl font-bold transition-all transform hover:scale-105">
+                                <div class="text-3xl mb-2">🤔</div>
+                                <div class="text-lg mb-1">Difícil</div>
+                                <div class="text-xs text-orange-200 mb-2">Lembrei com esforço</div>
+                                <div class="text-xs bg-orange-500 px-2 py-1 rounded">Revisar em 6 min</div>
+                            </button>
+                            <button onclick="answerCard('good')" class="bg-green-600 hover:bg-green-700 py-6 rounded-2xl font-bold transition-all transform hover:scale-105">
+                                <div class="text-3xl mb-2">👍</div>
+                                <div class="text-lg mb-1">Bom</div>
+                                <div class="text-xs text-green-200 mb-2">Lembrei bem</div>
+                                <div class="text-xs bg-green-500 px-2 py-1 rounded">Revisar em 1 dia</div>
+                            </button>
+                            <button onclick="answerCard('easy')" class="bg-blue-600 hover:bg-blue-700 py-6 rounded-2xl font-bold transition-all transform hover:scale-105">
+                                <div class="text-3xl mb-2">🎯</div>
+                                <div class="text-lg mb-1">Muito Fácil</div>
+                                <div class="text-xs text-blue-200 mb-2">Sabia na hora</div>
+                                <div class="text-xs bg-blue-500 px-2 py-1 rounded">Revisar em 4 dias</div>
+                            </button>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-yellow-500/20 rounded-2xl">
+                            <div class="text-center">
+                                <div class="text-sm font-semibold text-yellow-200 mb-2">💡 Como funciona a Repetição Espaçada?</div>
+                                <div class="text-xs text-yellow-100">
+                                    Palavras difíceis aparecem mais vezes. Palavras fáceis aparecem com intervalos maiores. 
+                                    O algoritmo otimiza quando você deve revisar cada palavra para máxima retenção!
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Session Stats -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4">Estatísticas da Sessão</h4>
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="text-sm">Novas:</span>
+                                <span class="font-bold text-green-400" id="new-count">3</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm">Revisões:</span>
+                                <span class="font-bold text-blue-400" id="review-count">20</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm">Precisão:</span>
+                                <span class="font-bold text-purple-400" id="session-accuracy">87%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm">Tempo:</span>
+                                <span class="font-bold text-yellow-400" id="session-time">12:34</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Word Connections -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4">Palavras Relacionadas</h4>
+                        <div class="space-y-2">
+                            <div class="bg-white/10 p-3 rounded-lg cursor-pointer hover:bg-white/20 transition-all word-connection">
+                                <div class="font-semibold">Coincidence</div>
+                                <div class="text-xs text-gray-300">Similar meaning</div>
+                            </div>
+                            <div class="bg-white/10 p-3 rounded-lg cursor-pointer hover:bg-white/20 transition-all word-connection">
+                                <div class="font-semibold">Fortune</div>
+                                <div class="text-xs text-gray-300">Related concept</div>
+                            </div>
+                            <div class="bg-white/10 p-3 rounded-lg cursor-pointer hover:bg-white/20 transition-all word-connection">
+                                <div class="font-semibold">Discovery</div>
+                                <div class="text-xs text-gray-300">Same category</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Memory Strength -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4">Força da Memória</h4>
+                        <div class="text-center">
+                            <svg class="w-20 h-20 mx-auto mb-4">
+                                <circle cx="40" cy="40" r="35" stroke="#374151" stroke-width="6" fill="none"></circle>
+                                <circle cx="40" cy="40" r="35" stroke="#10b981" stroke-width="6" fill="none" 
+                                        stroke-dasharray="220" stroke-dashoffset="66" class="progress-ring transform -rotate-90 origin-center"></circle>
+                            </svg>
+                            <div class="text-2xl font-bold text-green-400 mb-1">70%</div>
+                            <div class="text-sm text-gray-300">Consolidação</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4">Ações Rápidas</h4>
+                        <div class="space-y-3">
+                            <button class="w-full bg-purple-600 hover:bg-purple-700 py-2 rounded-lg text-sm font-bold transition-all">
+                                🔊 Ouvir Pronúncia
+                            </button>
+                            <button class="w-full bg-blue-600 hover:bg-blue-700 py-2 rounded-lg text-sm font-bold transition-all">
+                                📝 Ver Exemplos
+                            </button>
+                            <button class="w-full bg-green-600 hover:bg-green-700 py-2 rounded-lg text-sm font-bold transition-all">
+                                🎯 Marcar Difícil
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let appState = {
+            currentMode: 'dashboard',
+            currentCard: 1,
+            totalCards: 23,
+            sessionStats: {
+                newWords: 3,
+                reviews: 20,
+                accuracy: 87,
+                timeSpent: 0
+            },
+            words: [
+                {
+                    word: 'SERENDIPITY',
+                    type: 'substantivo',
+                    usage: 'It was pure serendipity that led to this discovery',
+                    definition: 'Uma descoberta feliz e inesperada',
+                    translation: '"Serendipidade" em português',
+                    example: 'Finding this job was pure serendipity.',
+                    exampleTranslation: 'Encontrar este emprego foi pura serendipidade.',
+                    pronunciation: '/ˌserənˈdɪpɪti/',
+                    difficulty: 'hard',
+                    memoryStrength: 70
+                },
+                {
+                    word: 'EPHEMERAL',
+                    type: 'adjetivo',
+                    usage: 'The moment was beautiful but ephemeral',
+                    definition: 'Que dura muito pouco tempo',
+                    translation: '"Efêmero" em português',
+                    example: 'The beauty of cherry blossoms is ephemeral.',
+                    exampleTranslation: 'A beleza das flores de cerejeira é efêmera.',
+                    pronunciation: '/ɪˈfem(ə)rəl/',
+                    difficulty: 'expert',
+                    memoryStrength: 45
+                },
+                {
+                    word: 'UBIQUITOUS',
+                    type: 'adjetivo',
+                    usage: 'Coffee shops are ubiquitous in this city',
+                    definition: 'Presente em todos os lugares',
+                    translation: '"Onipresente" em português',
+                    example: 'Smartphones have become ubiquitous in modern society.',
+                    exampleTranslation: 'Smartphones se tornaram onipresentes na sociedade moderna.',
+                    pronunciation: '/juːˈbɪkwɪtəs/',
+                    difficulty: 'medium',
+                    memoryStrength: 85
+                }
+            ],
+            currentWordIndex: 0,
+            isFlipped: false,
+            sessionStartTime: Date.now()
+        };
+
+        // Start different learning modes
+        function startSpacedRepetition() {
+            showLearningInterface();
+            document.getElementById('session-title').textContent = 'Repetição Espaçada';
+            loadCurrentWord();
+        }
+
+        function learnNewWords() {
+            showLearningInterface();
+            document.getElementById('session-title').textContent = 'Palavras Novas';
+            loadCurrentWord();
+        }
+
+        function contextLearning() {
+            showLearningInterface();
+            document.getElementById('session-title').textContent = 'Aprendizado Contextual';
+            loadCurrentWord();
+        }
+
+        function wordGames() {
+            showLearningInterface();
+            document.getElementById('session-title').textContent = 'Jogos de Vocabulário';
+            loadCurrentWord();
+        }
+
+        // Show learning interface
+        function showLearningInterface() {
+            document.getElementById('main-dashboard').style.display = 'none';
+            document.getElementById('learning-interface').style.display = 'block';
+            appState.currentMode = 'learning';
+            startSessionTimer();
+        }
+
+        // Load current word
+        function loadCurrentWord() {
+            const word = appState.words[appState.currentWordIndex];
+            
+            // Front card
+            document.getElementById('word-front').textContent = word.word;
+            document.getElementById('word-type').textContent = word.type;
+            document.getElementById('word-usage').textContent = `"${word.usage}"`;
+            document.getElementById('word-pronunciation').textContent = word.pronunciation;
+            
+            // Back card
+            document.getElementById('word-back').textContent = word.word;
+            document.getElementById('word-definition').textContent = word.definition;
+            document.getElementById('word-translation').textContent = word.translation;
+            document.getElementById('word-example').textContent = `💬 "${word.example}"`;
+            document.querySelector('#card-back .text-sm.text-green-200.mt-4').textContent = `"${word.exampleTranslation}"`;
+            
+            // Update progress
+            document.getElementById('current-card').textContent = appState.currentCard;
+            document.getElementById('total-cards').textContent = appState.totalCards;
+            
+            const progress = (appState.currentCard / appState.totalCards) * 100;
+            document.getElementById('session-progress').style.width = progress + '%';
+            
+            // Reset card flip
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.remove('flipped');
+            appState.isFlipped = false;
+            
+            // Update memory strength
+            updateMemoryStrength(word.memoryStrength);
+        }
+
+        // Flip card
+        function flipCard() {
+            const flashcard = document.getElementById('flashcard');
+            flashcard.classList.toggle('flipped');
+            appState.isFlipped = !appState.isFlipped;
+            
+            if (appState.isFlipped) {
+                // Hide show definition section and show answer buttons
+                document.getElementById('show-definition-section').classList.add('hidden');
+                document.getElementById('answer-buttons').classList.remove('hidden');
+            }
+        }
+
+        // Answer card
+        function answerCard(difficulty) {
+            if (!appState.isFlipped) {
+                flipCard();
+                return;
+            }
+            
+            // Calculate XP based on difficulty
+            let xp = 0;
+            switch(difficulty) {
+                case 'again': xp = 5; break;
+                case 'hard': xp = 10; break;
+                case 'good': xp = 20; break;
+                case 'easy': xp = 30; break;
+            }
+            
+            // Show XP gain animation
+            showXPGain(xp);
+            
+            // Update stats
+            if (difficulty === 'good' || difficulty === 'easy') {
+                appState.sessionStats.accuracy = Math.min(100, appState.sessionStats.accuracy + 1);
+            } else {
+                appState.sessionStats.accuracy = Math.max(0, appState.sessionStats.accuracy - 2);
+            }
+            
+            updateSessionStats();
+            
+            // Move to next card
+            setTimeout(() => {
+                nextCard();
+            }, 1500);
+        }
+
+        // Next card
+        function nextCard() {
+            appState.currentCard++;
+            appState.currentWordIndex = (appState.currentWordIndex + 1) % appState.words.length;
+            
+            if (appState.currentCard > appState.totalCards) {
+                endSession();
+                return;
+            }
+            
+
+            
+            // Show front card and hide back card
+            document.getElementById('card-front').classList.remove('hidden');
+            document.getElementById('card-back').classList.add('hidden');
+            
+            // Show definition section and hide answer buttons
+            document.getElementById('show-definition-section').classList.remove('hidden');
+            document.getElementById('answer-buttons').classList.add('hidden');
+            
+            appState.isFlipped = false;
+            
+            loadCurrentWord();
+        }
+
+        // Show XP gain
+        function showXPGain(xp) {
+            const xpElement = document.createElement('div');
+            xpElement.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-4xl font-bold text-yellow-400 z-50 xp-gain';
+            xpElement.textContent = `+${xp} XP`;
+            document.body.appendChild(xpElement);
+            
+            setTimeout(() => {
+                document.body.removeChild(xpElement);
+            }, 2000);
+        }
+
+        // Update memory strength visualization
+        function updateMemoryStrength(strength) {
+            const circle = document.querySelector('.progress-ring');
+            const circumference = 2 * Math.PI * 35;
+            const offset = circumference - (strength / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            
+            // Update percentage display
+            document.querySelector('.text-2xl.font-bold.text-green-400').textContent = strength + '%';
+        }
+
+        // Update session stats
+        function updateSessionStats() {
+            document.getElementById('session-accuracy').textContent = Math.round(appState.sessionStats.accuracy) + '%';
+            
+            // Update time
+            const elapsed = Math.floor((Date.now() - appState.sessionStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('session-time').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Start session timer
+        function startSessionTimer() {
+            appState.sessionStartTime = Date.now();
+            setInterval(updateSessionStats, 1000);
+        }
+
+        // End session
+        function endSession() {
+            // Show completion animation
+            const completionElement = document.createElement('div');
+            completionElement.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50';
+            completionElement.innerHTML = `
+                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-12 text-center level-up">
+                    <div class="text-8xl mb-6">🎉</div>
+                    <h2 class="text-4xl font-bold mb-4">Sessão Concluída!</h2>
+                    <div class="text-xl text-gray-300 mb-8">Excelente trabalho!</div>
+                    <div class="grid grid-cols-2 gap-6 mb-8">
+                        <div>
+                            <div class="text-3xl font-bold text-green-400">${appState.sessionStats.newWords}</div>
+                            <div class="text-sm text-gray-300">Palavras Novas</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold text-blue-400">${Math.round(appState.sessionStats.accuracy)}%</div>
+                            <div class="text-sm text-gray-300">Precisão</div>
+                        </div>
+                    </div>
+                    <button onclick="goBackToDashboard()" class="bg-gradient-to-r from-green-500 to-blue-500 px-8 py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-600 transition-all">
+                        Continuar
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(completionElement);
+        }
+
+        // Go back to dashboard
+        function goBackToDashboard() {
+            // Remove completion screen if exists
+            const completionScreen = document.querySelector('.fixed.inset-0');
+            if (completionScreen) {
+                document.body.removeChild(completionScreen);
+            }
+            
+            document.getElementById('learning-interface').style.display = 'none';
+            document.getElementById('main-dashboard').style.display = 'block';
+            appState.currentMode = 'dashboard';
+        }
+
+        // Go back
+        function goBack() {
+            if (appState.currentMode === 'learning') {
+                if (confirm('Tem certeza que deseja sair? Seu progresso será salvo.')) {
+                    goBackToDashboard();
+                }
+            } else {
+                window.history.back();
+            }
+        }
+
+        // Generate recent words
+        function generateRecentWords() {
+            const container = document.querySelector('#main-dashboard .grid.grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-4.gap-4');
+            
+            const recentWords = [
+                { word: 'Serendipity', strength: 4, difficulty: 'hard' },
+                { word: 'Ephemeral', strength: 2, difficulty: 'expert' },
+                { word: 'Ubiquitous', strength: 5, difficulty: 'medium' },
+                { word: 'Mellifluous', strength: 3, difficulty: 'hard' }
+            ];
+            
+            recentWords.forEach(wordData => {
+                const wordCard = document.createElement('div');
+                wordCard.className = `bg-white/10 backdrop-blur-lg rounded-2xl p-4 cursor-pointer hover:bg-white/20 transition-all memory-strength-${wordData.strength} difficulty-${wordData.difficulty}`;
+                wordCard.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-xl font-bold mb-2">${wordData.word}</div>
+                        <div class="flex justify-center space-x-1 mb-2">
+                            ${Array.from({length: 5}, (_, i) => 
+                                `<div class="w-2 h-2 rounded-full ${i < wordData.strength ? 'bg-green-500' : 'bg-gray-600'}"></div>`
+                            ).join('')}
+                        </div>
+                        <div class="text-xs text-gray-400 capitalize">${wordData.difficulty}</div>
+                    </div>
+                `;
+                container.appendChild(wordCard);
+            });
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            generateRecentWords();
+            
+            // Simulate some dynamic updates
+            setInterval(() => {
+                const timeElement = document.getElementById('time-today');
+                const currentTime = parseInt(timeElement.textContent);
+                timeElement.textContent = (currentTime + 1) + 'm';
+            }, 60000); // Update every minute
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9760e0acf6baa672',t:'MTc1NjM1MzM3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

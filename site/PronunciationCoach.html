@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronunciation Coach - Treinador de Pronúncia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
+        .phoneme-card { transition: all 0.3s ease; }
+        .phoneme-card:hover { transform: translateY(-4px) scale(1.02); }
+        
+        .recording { animation: recordPulse 1.5s ease-in-out infinite; }
+        .analyzing { animation: analyzeSpin 2s linear infinite; }
+        
+        @keyframes recordPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        }
+        
+        @keyframes analyzeSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .waveform {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            animation: waveAnimation 2s ease-in-out infinite;
+        }
+        
+        @keyframes waveAnimation {
+            0%, 100% { height: 20px; }
+            50% { height: 60px; }
+        }
+        
+        .accuracy-excellent { background: linear-gradient(135deg, #10b981, #059669); }
+        .accuracy-good { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .accuracy-needs-work { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        
+        .phoneme-symbol {
+            font-family: 'Lucida Sans Unicode', 'Arial Unicode MS', sans-serif;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        
+        .mouth-animation {
+            transition: all 0.5s ease;
+        }
+        
+        .tongue-position {
+            animation: tongueMove 3s ease-in-out infinite;
+        }
+        
+        @keyframes tongueMove {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .progress-ring {
+            transition: stroke-dasharray 0.5s ease;
+        }
+        
+        .badge-earned {
+            animation: badgeBounce 0.8s ease-out;
+        }
+        
+        @keyframes badgeBounce {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .streak-fire {
+            animation: fireFlicker 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes fireFlicker {
+            0%, 100% { transform: scale(1) rotate(-2deg); }
+            50% { transform: scale(1.1) rotate(2deg); }
+        }
+        
+        .sound-wave {
+            animation: soundWave 1s ease-in-out infinite;
+        }
+        
+        @keyframes soundWave {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(1.5); }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 min-h-screen text-white">
+    <!-- Header -->
+    <header class="gradient-bg shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors">
+                        <span class="text-xl">←</span>
+                    </button>
+                    <div>
+                        <h1 class="text-3xl font-black flex items-center">
+                            🎤 PRONUNCIATION COACH
+                        </h1>
+                        <p class="text-purple-100">Treinador Inteligente de Pronúncia</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <!-- Daily Streak -->
+                    <div class="text-center">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-2xl streak-fire">🔥</span>
+                            <span class="text-2xl font-bold" id="streak-count">7</span>
+                        </div>
+                        <div class="text-xs text-purple-100">Dias</div>
+                    </div>
+                    
+                    <!-- Accuracy Score -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold" id="accuracy-score">87%</div>
+                        <div class="text-xs text-purple-100">Precisão</div>
+                    </div>
+                    
+                    <!-- Phonemes Mastered -->
+                    <div class="text-center">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xl">🎯</span>
+                            <span class="text-2xl font-bold" id="mastered-count">23</span>
+                            <span class="text-lg text-purple-200">/44</span>
+                        </div>
+                        <div class="text-xs text-purple-100">Fonemas</div>
+                    </div>
+                    
+                    <!-- Level -->
+                    <div class="text-center">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xl">⭐</span>
+                            <span class="text-2xl font-bold" id="user-level">5</span>
+                        </div>
+                        <div class="text-xs text-purple-100">Nível</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Main Dashboard -->
+        <div id="main-dashboard">
+            <!-- Quick Practice Section -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold mb-6 text-center">Prática Rápida</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Daily Challenge -->
+                    <div class="bg-gradient-to-br from-yellow-500 to-orange-600 rounded-3xl p-6 cursor-pointer transform hover:scale-105 transition-all" onclick="startDailyChallenge()">
+                        <div class="text-center">
+                            <div class="text-5xl mb-4">🏆</div>
+                            <h3 class="text-xl font-bold mb-2">Desafio Diário</h3>
+                            <p class="text-yellow-100 text-sm mb-4">5 sons problemáticos para brasileiros</p>
+                            <div class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold">
+                                +50 XP
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Minimal Pairs -->
+                    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-3xl p-6 cursor-pointer transform hover:scale-105 transition-all" onclick="startMinimalPairs()">
+                        <div class="text-center">
+                            <div class="text-5xl mb-4">👥</div>
+                            <h3 class="text-xl font-bold mb-2">Minimal Pairs</h3>
+                            <p class="text-blue-100 text-sm mb-4">Distingua sons similares</p>
+                            <div class="bg-blue-400 text-blue-900 px-3 py-1 rounded-full text-xs font-bold">
+                                INTERMEDIÁRIO
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tongue Twisters -->
+                    <div class="bg-gradient-to-br from-purple-500 to-pink-600 rounded-3xl p-6 cursor-pointer transform hover:scale-105 transition-all" onclick="startTongueTwisters()">
+                        <div class="text-center">
+                            <div class="text-5xl mb-4">🌪️</div>
+                            <h3 class="text-xl font-bold mb-2">Tongue Twisters</h3>
+                            <p class="text-purple-100 text-sm mb-4">Desafie sua articulação</p>
+                            <div class="bg-purple-400 text-purple-900 px-3 py-1 rounded-full text-xs font-bold">
+                                AVANÇADO
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phoneme Categories -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold mb-6 text-center">Categorias de Sons</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Vowels -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 cursor-pointer hover:bg-white/20 transition-all" onclick="openCategory('vowels')">
+                        <div class="text-center">
+                            <div class="text-4xl mb-3">🅰️</div>
+                            <h3 class="text-lg font-bold mb-2">Vogais</h3>
+                            <p class="text-gray-300 text-sm mb-3">12 sons vocálicos</p>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 75%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">9/12 dominados</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Consonants -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 cursor-pointer hover:bg-white/20 transition-all" onclick="openCategory('consonants')">
+                        <div class="text-center">
+                            <div class="text-4xl mb-3">🅱️</div>
+                            <h3 class="text-lg font-bold mb-2">Consoantes</h3>
+                            <p class="text-gray-300 text-sm mb-3">24 sons consonantais</p>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 60%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">14/24 dominados</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Diphthongs -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 cursor-pointer hover:bg-white/20 transition-all" onclick="openCategory('diphthongs')">
+                        <div class="text-center">
+                            <div class="text-4xl mb-3">🎵</div>
+                            <h3 class="text-lg font-bold mb-2">Ditongos</h3>
+                            <p class="text-gray-300 text-sm mb-3">8 sons compostos</p>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: 40%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">3/8 dominados</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Word Stress -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 cursor-pointer hover:bg-white/20 transition-all" onclick="openCategory('stress')">
+                        <div class="text-center">
+                            <div class="text-4xl mb-3">📈</div>
+                            <h3 class="text-lg font-bold mb-2">Acentuação</h3>
+                            <p class="text-gray-300 text-sm mb-3">Padrões de stress</p>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-yellow-500 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Excelente!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Badges -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold mb-6">Conquistas Recentes</h2>
+                <div class="flex space-x-4 overflow-x-auto pb-4">
+                    <div class="bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-2xl p-4 min-w-[200px] text-center">
+                        <div class="text-3xl mb-2">🏅</div>
+                        <h4 class="font-bold text-yellow-900">Vowel Master</h4>
+                        <p class="text-xs text-yellow-800">Dominou todas as vogais</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl p-4 min-w-[200px] text-center">
+                        <div class="text-3xl mb-2">🎯</div>
+                        <h4 class="font-bold text-blue-900">Precision Pro</h4>
+                        <p class="text-xs text-blue-800">90%+ de precisão por 5 dias</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl p-4 min-w-[200px] text-center">
+                        <div class="text-3xl mb-2">🔥</div>
+                        <h4 class="font-bold text-purple-900">Week Warrior</h4>
+                        <p class="text-xs text-purple-800">7 dias consecutivos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Practice Interface (Hidden Initially) -->
+        <div id="practice-interface" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Main Practice Area -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 mb-6">
+                        <!-- Current Phoneme -->
+                        <div class="text-center mb-8">
+                            <div class="phoneme-symbol text-8xl mb-4" id="current-phoneme">/æ/</div>
+                            <h3 class="text-2xl font-bold mb-2" id="phoneme-name">Short A Sound</h3>
+                            <p class="text-gray-300" id="phoneme-description">Como em "cat", "hat", "bat"</p>
+                        </div>
+                        
+                        <!-- Audio Controls -->
+                        <div class="flex justify-center space-x-4 mb-8">
+                            <button onclick="playExample()" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-all">
+                                <span>🔊</span>
+                                <span>Ouvir Exemplo</span>
+                            </button>
+                            <button onclick="playSlowly()" class="bg-green-600 hover:bg-green-700 px-6 py-3 rounded-xl font-bold flex items-center space-x-2 transition-all">
+                                <span>🐌</span>
+                                <span>Devagar</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Recording Area -->
+                        <div class="bg-black/20 rounded-2xl p-6 mb-6">
+                            <div class="text-center mb-4">
+                                <button onclick="toggleRecording()" id="record-btn" class="bg-red-600 hover:bg-red-700 w-20 h-20 rounded-full flex items-center justify-center text-3xl transition-all">
+                                    🎤
+                                </button>
+                                <p class="text-sm text-gray-300 mt-2" id="record-status">Clique para gravar</p>
+                            </div>
+                            
+                            <!-- Waveform Visualization -->
+                            <div class="flex justify-center items-end space-x-1 h-16 mb-4" id="waveform">
+                                <!-- Waveform bars will be generated here -->
+                            </div>
+                            
+                            <!-- Accuracy Meter -->
+                            <div class="text-center" id="accuracy-display" style="display: none;">
+                                <div class="text-4xl font-bold mb-2" id="accuracy-percentage">87%</div>
+                                <div class="w-full bg-gray-700 rounded-full h-4 mb-2">
+                                    <div class="accuracy-good h-4 rounded-full transition-all" id="accuracy-bar" style="width: 87%"></div>
+                                </div>
+                                <p class="text-sm" id="accuracy-feedback">Muito bom! Tente abrir mais a boca.</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Practice Words -->
+                        <div>
+                            <h4 class="text-lg font-bold mb-4">Palavras para Praticar</h4>
+                            <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="practice-words">
+                                <!-- Words will be generated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Mouth Position Guide -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4 flex items-center">
+                            👄 Posição da Boca
+                        </h4>
+                        <div class="text-center mb-4">
+                            <div class="mouth-animation w-32 h-32 mx-auto bg-pink-200 rounded-full relative overflow-hidden">
+                                <div class="absolute inset-x-4 bottom-8 h-8 bg-red-400 rounded-full tongue-position"></div>
+                                <div class="absolute inset-x-8 bottom-4 h-4 bg-white rounded-full"></div>
+                            </div>
+                        </div>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Abertura:</span>
+                                <span class="font-bold">Média</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Língua:</span>
+                                <span class="font-bold">Baixa, Frontal</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Lábios:</span>
+                                <span class="font-bold">Neutros</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Ring -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4 text-center">Progresso do Som</h4>
+                        <div class="flex justify-center mb-4">
+                            <svg class="w-24 h-24 transform -rotate-90">
+                                <circle cx="48" cy="48" r="40" stroke="#374151" stroke-width="8" fill="none"></circle>
+                                <circle cx="48" cy="48" r="40" stroke="#10b981" stroke-width="8" fill="none" 
+                                        stroke-dasharray="251.2" stroke-dashoffset="62.8" class="progress-ring"></circle>
+                            </svg>
+                            <div class="absolute flex items-center justify-center w-24 h-24">
+                                <span class="text-2xl font-bold">75%</span>
+                            </div>
+                        </div>
+                        <div class="text-center text-sm text-gray-300">
+                            <p>15/20 tentativas corretas</p>
+                            <p class="text-green-400 font-bold mt-1">Quase dominado!</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Tips -->
+                    <div class="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-2xl p-6">
+                        <h4 class="font-bold mb-4 flex items-center">
+                            💡 Dica Personalizada
+                        </h4>
+                        <p class="text-sm" id="personalized-tip">
+                            Para o som /æ/, imagine que você está no dentista dizendo "ah", mas com a boca menos aberta. É o som do "a" em "gato" em português, mas mais frontal.
+                        </p>
+                    </div>
+                    
+                    <!-- Similar Sounds -->
+                    <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                        <h4 class="font-bold mb-4">Sons Similares</h4>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg cursor-pointer hover:bg-white/20 transition-all">
+                                <div class="flex items-center space-x-3">
+                                    <span class="phoneme-symbol text-xl">/ʌ/</span>
+                                    <span class="text-sm">Short U</span>
+                                </div>
+                                <span class="text-xs text-gray-400">cup, but</span>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-white/10 rounded-lg cursor-pointer hover:bg-white/20 transition-all">
+                                <div class="flex items-center space-x-3">
+                                    <span class="phoneme-symbol text-xl">/ɑ/</span>
+                                    <span class="text-sm">Short O</span>
+                                </div>
+                                <span class="text-xs text-gray-400">hot, got</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let appState = {
+            currentMode: 'dashboard',
+            currentPhoneme: null,
+            isRecording: false,
+            recordingData: null,
+            accuracy: 0,
+            streak: 7,
+            level: 5,
+            masteredPhonemes: 23,
+            totalPhonemes: 44,
+            phonemes: {
+                vowels: [
+                    { symbol: '/æ/', name: 'Short A', words: ['cat', 'hat', 'bat', 'mat', 'sat', 'fat'], description: 'Como em "cat", "hat", "bat"' },
+                    { symbol: '/ɑ/', name: 'Short O', words: ['hot', 'got', 'lot', 'pot', 'not', 'dot'], description: 'Como em "hot", "got", "lot"' },
+                    { symbol: '/ʌ/', name: 'Short U', words: ['cup', 'but', 'cut', 'nut', 'run', 'fun'], description: 'Como em "cup", "but", "cut"' },
+                    { symbol: '/ɪ/', name: 'Short I', words: ['bit', 'sit', 'hit', 'fit', 'pit', 'kit'], description: 'Como em "bit", "sit", "hit"' },
+                    { symbol: '/ɛ/', name: 'Short E', words: ['bet', 'set', 'net', 'pet', 'get', 'let'], description: 'Como em "bet", "set", "net"' }
+                ],
+                consonants: [
+                    { symbol: '/θ/', name: 'Voiceless TH', words: ['think', 'thank', 'three', 'throw', 'thick', 'thin'], description: 'Como em "think", "thank"' },
+                    { symbol: '/ð/', name: 'Voiced TH', words: ['this', 'that', 'they', 'there', 'then', 'the'], description: 'Como em "this", "that"' },
+                    { symbol: '/ʃ/', name: 'SH Sound', words: ['ship', 'shop', 'shoe', 'show', 'wash', 'fish'], description: 'Como em "ship", "shop"' },
+                    { symbol: '/ʒ/', name: 'ZH Sound', words: ['measure', 'pleasure', 'vision', 'decision', 'usual', 'casual'], description: 'Como em "measure", "pleasure"' }
+                ]
+            },
+            practiceWords: ['cat', 'hat', 'bat', 'mat', 'sat', 'fat'],
+            currentWordIndex: 0
+        };
+
+        // Start different practice modes
+        function startDailyChallenge() {
+            showPracticeInterface();
+            loadPhoneme(appState.phonemes.vowels[0]);
+        }
+
+        function startMinimalPairs() {
+            showPracticeInterface();
+            loadPhoneme(appState.phonemes.consonants[0]);
+        }
+
+        function startTongueTwisters() {
+            showPracticeInterface();
+            loadPhoneme(appState.phonemes.consonants[1]);
+        }
+
+        function openCategory(category) {
+            showPracticeInterface();
+            if (category === 'vowels') {
+                loadPhoneme(appState.phonemes.vowels[0]);
+            } else if (category === 'consonants') {
+                loadPhoneme(appState.phonemes.consonants[0]);
+            }
+        }
+
+        // Show practice interface
+        function showPracticeInterface() {
+            document.getElementById('main-dashboard').style.display = 'none';
+            document.getElementById('practice-interface').style.display = 'block';
+        }
+
+        // Load phoneme for practice
+        function loadPhoneme(phoneme) {
+            appState.currentPhoneme = phoneme;
+            
+            document.getElementById('current-phoneme').textContent = phoneme.symbol;
+            document.getElementById('phoneme-name').textContent = phoneme.name;
+            document.getElementById('phoneme-description').textContent = phoneme.description;
+            
+            // Load practice words
+            const wordsContainer = document.getElementById('practice-words');
+            wordsContainer.innerHTML = '';
+            
+            phoneme.words.forEach((word, index) => {
+                const wordButton = document.createElement('button');
+                wordButton.className = 'bg-white/20 hover:bg-white/30 p-3 rounded-lg text-center transition-all';
+                wordButton.innerHTML = `
+                    <div class="font-bold">${word}</div>
+                    <div class="text-xs text-gray-300 mt-1">Clique para ouvir</div>
+                `;
+                wordButton.onclick = () => playWord(word);
+                wordsContainer.appendChild(wordButton);
+            });
+            
+            // Generate waveform bars
+            generateWaveform();
+        }
+
+        // Audio functions (simulated)
+        function playExample() {
+            showAudioFeedback('🔊 Reproduzindo exemplo...');
+            // In a real app, this would play the phoneme sound
+        }
+
+        function playSlowly() {
+            showAudioFeedback('🐌 Reproduzindo devagar...');
+            // In a real app, this would play the sound slowly
+        }
+
+        function playWord(word) {
+            showAudioFeedback(`🔊 Reproduzindo: ${word}`);
+            // In a real app, this would play the word
+        }
+
+        function showAudioFeedback(message) {
+            const status = document.getElementById('record-status');
+            const originalText = status.textContent;
+            status.textContent = message;
+            status.className = 'text-sm text-blue-300 mt-2';
+            
+            setTimeout(() => {
+                status.textContent = originalText;
+                status.className = 'text-sm text-gray-300 mt-2';
+            }, 2000);
+        }
+
+        // Recording functions
+        function toggleRecording() {
+            const recordBtn = document.getElementById('record-btn');
+            const recordStatus = document.getElementById('record-status');
+            
+            if (!appState.isRecording) {
+                // Start recording
+                appState.isRecording = true;
+                recordBtn.className = 'recording bg-red-600 w-20 h-20 rounded-full flex items-center justify-center text-3xl transition-all';
+                recordStatus.textContent = 'Gravando... Fale agora!';
+                recordStatus.className = 'text-sm text-red-300 mt-2';
+                
+                // Simulate recording animation
+                animateWaveform();
+                
+                // Auto-stop after 3 seconds
+                setTimeout(() => {
+                    if (appState.isRecording) {
+                        toggleRecording();
+                    }
+                }, 3000);
+                
+            } else {
+                // Stop recording
+                appState.isRecording = false;
+                recordBtn.className = 'analyzing bg-blue-600 w-20 h-20 rounded-full flex items-center justify-center text-3xl transition-all';
+                recordStatus.textContent = 'Analisando...';
+                recordStatus.className = 'text-sm text-blue-300 mt-2';
+                
+                // Simulate analysis
+                setTimeout(() => {
+                    analyzeRecording();
+                }, 2000);
+            }
+        }
+
+        // Analyze recording (simulated)
+        function analyzeRecording() {
+            const recordBtn = document.getElementById('record-btn');
+            const recordStatus = document.getElementById('record-status');
+            const accuracyDisplay = document.getElementById('accuracy-display');
+            
+            // Generate random accuracy between 70-95%
+            const accuracy = Math.floor(Math.random() * 25) + 70;
+            appState.accuracy = accuracy;
+            
+            // Update UI
+            recordBtn.className = 'bg-red-600 hover:bg-red-700 w-20 h-20 rounded-full flex items-center justify-center text-3xl transition-all';
+            recordStatus.textContent = 'Clique para gravar novamente';
+            recordStatus.className = 'text-sm text-gray-300 mt-2';
+            
+            // Show accuracy
+            document.getElementById('accuracy-percentage').textContent = accuracy + '%';
+            document.getElementById('accuracy-bar').style.width = accuracy + '%';
+            
+            // Set accuracy class and feedback
+            const accuracyBar = document.getElementById('accuracy-bar');
+            const accuracyFeedback = document.getElementById('accuracy-feedback');
+            
+            if (accuracy >= 90) {
+                accuracyBar.className = 'accuracy-excellent h-4 rounded-full transition-all';
+                accuracyFeedback.textContent = 'Excelente! Pronúncia perfeita!';
+            } else if (accuracy >= 75) {
+                accuracyBar.className = 'accuracy-good h-4 rounded-full transition-all';
+                accuracyFeedback.textContent = 'Muito bom! Continue praticando.';
+            } else {
+                accuracyBar.className = 'accuracy-needs-work h-4 rounded-full transition-all';
+                accuracyFeedback.textContent = 'Precisa melhorar. Tente novamente.';
+            }
+            
+            accuracyDisplay.style.display = 'block';
+            
+            // Update overall stats
+            updateStats();
+        }
+
+        // Generate waveform visualization
+        function generateWaveform() {
+            const waveform = document.getElementById('waveform');
+            waveform.innerHTML = '';
+            
+            for (let i = 0; i < 20; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'waveform w-2 bg-blue-500 rounded-t';
+                bar.style.height = '20px';
+                bar.style.animationDelay = (i * 0.1) + 's';
+                waveform.appendChild(bar);
+            }
+        }
+
+        // Animate waveform during recording
+        function animateWaveform() {
+            const bars = document.querySelectorAll('.waveform');
+            
+            const animationInterval = setInterval(() => {
+                if (!appState.isRecording) {
+                    clearInterval(animationInterval);
+                    bars.forEach(bar => {
+                        bar.style.height = '20px';
+                    });
+                    return;
+                }
+                
+                bars.forEach(bar => {
+                    const height = Math.random() * 40 + 20;
+                    bar.style.height = height + 'px';
+                });
+            }, 100);
+        }
+
+        // Update stats
+        function updateStats() {
+            // Simulate stat updates
+            if (appState.accuracy >= 85) {
+                appState.streak = Math.min(appState.streak + 1, 30);
+                document.getElementById('streak-count').textContent = appState.streak;
+            }
+            
+            // Update accuracy score
+            const currentAccuracy = parseInt(document.getElementById('accuracy-score').textContent);
+            const newAccuracy = Math.round((currentAccuracy + appState.accuracy) / 2);
+            document.getElementById('accuracy-score').textContent = newAccuracy + '%';
+        }
+
+        // Go back to dashboard
+        function goBack() {
+            if (appState.currentMode === 'practice') {
+                document.getElementById('practice-interface').style.display = 'none';
+                document.getElementById('main-dashboard').style.display = 'block';
+                appState.currentMode = 'dashboard';
+            } else {
+                window.history.back();
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            generateWaveform();
+            
+            // Simulate some initial stats
+            document.getElementById('accuracy-score').textContent = '87%';
+            document.getElementById('mastered-count').textContent = '23';
+            document.getElementById('user-level').textContent = '5';
+            document.getElementById('streak-count').textContent = '7';
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9760c7f5144bd917',t:'MTc1NjM1MjM2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

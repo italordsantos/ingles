@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Lab - Treino de Listening</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .audio-wave {
+            background: linear-gradient(45deg, #3b82f6, #8b5cf6);
+            animation: audioWave 2s ease-in-out infinite;
+        }
+
+        .audio-playing .audio-wave {
+            animation: audioWavePlaying 0.8s ease-in-out infinite;
+        }
+
+        @keyframes audioWave {
+
+            0%,
+            100% {
+                transform: scaleY(0.3);
+            }
+
+            50% {
+                transform: scaleY(1);
+            }
+        }
+
+        @keyframes audioWavePlaying {
+
+            0%,
+            100% {
+                transform: scaleY(0.2);
+            }
+
+            25% {
+                transform: scaleY(1);
+            }
+
+            50% {
+                transform: scaleY(0.6);
+            }
+
+            75% {
+                transform: scaleY(0.9);
+            }
+        }
+
+        .bounce-in {
+            animation: bounceIn 0.6s ease-out;
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .pulse-success {
+            animation: pulseSuccess 0.8s ease-in-out;
+        }
+
+        .photo-hover {
+            transition: all 0.3s ease;
+        }
+
+        .photo-hover:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            70% {
+                transform: scale(0.9);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(-3px);
+            }
+
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(3px);
+            }
+        }
+
+        @keyframes pulseSuccess {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .waveform-bar {
+            width: 4px;
+            background: linear-gradient(to top, #3b82f6, #8b5cf6);
+            margin: 0 1px;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .transcript-input {
+            resize: none;
+            transition: all 0.3s ease;
+        }
+
+        .transcript-input:focus {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-100 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-xl">
+        <div class="max-w-6xl mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors">
+                        <span class="text-xl">←</span>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold flex items-center">
+                            🎧 Audio Lab
+                        </h1>
+                        <p class="text-blue-100">Treino de Listening - Nível B2</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <!-- Score -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold" id="score">0</div>
+                        <div class="text-xs text-blue-100">Pontos</div>
+                    </div>
+
+                    <!-- Accuracy -->
+                    <div class="text-center">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xl">🎯</span>
+                            <span class="text-2xl font-bold" id="accuracy">100%</span>
+                        </div>
+                        <div class="text-xs text-blue-100">Precisão</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="mt-4">
+                <div class="flex justify-between text-sm mb-2">
+                    <span>Progresso da Sessão</span>
+                    <span id="progress-text">1/8</span>
+                </div>
+                <div class="w-full bg-white/20 rounded-full h-3">
+                    <div class="bg-white h-3 rounded-full transition-all duration-500" style="width: 12.5%"
+                        id="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-5xl mx-auto px-4 py-8">
+        <!-- Exercise Type Indicator -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center bg-white rounded-full px-6 py-3 shadow-lg mb-4">
+                <span class="text-2xl mr-3" id="exercise-icon">🖼️</span>
+                <span class="font-semibold text-gray-700" id="exercise-type">Identificação Visual</span>
+            </div>
+            <p class="text-gray-600 max-w-2xl mx-auto" id="exercise-instruction">
+                Ouça o áudio e selecione a imagem que melhor representa o que foi falado.
+            </p>
+        </div>
+
+        <!-- Audio Player Section -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8 mb-8 bounce-in">
+            <div class="text-center mb-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">🎵 Player de Áudio</h3>
+
+                <!-- Waveform Visualization -->
+                <div class="flex items-end justify-center space-x-1 mb-6 h-16" id="waveform">
+                    <!-- Waveform bars will be generated here -->
+                </div>
+
+                <!-- Audio Controls -->
+                <div class="flex items-center justify-center space-x-4 mb-6">
+                    <button onclick="rewindAudio()"
+                        class="bg-gray-100 hover:bg-gray-200 p-3 rounded-full transition-colors">
+                        <span class="text-xl">⏪</span>
+                    </button>
+
+                    <button onclick="toggleAudio()" id="play-btn"
+                        class="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white p-4 rounded-full transition-all transform hover:scale-105 shadow-lg">
+                        <span class="text-2xl">▶️</span>
+                    </button>
+
+                    <button onclick="forwardAudio()"
+                        class="bg-gray-100 hover:bg-gray-200 p-3 rounded-full transition-colors">
+                        <span class="text-xl">⏩</span>
+                    </button>
+                </div>
+
+                <!-- Speed Control -->
+                <div class="flex items-center justify-center space-x-4 mb-4">
+                    <span class="text-sm text-gray-600">Velocidade:</span>
+                    <button onclick="setSpeed(0.75)"
+                        class="speed-btn bg-gray-100 hover:bg-blue-100 px-3 py-1 rounded-lg text-sm transition-colors">0.75x</button>
+                    <button onclick="setSpeed(1)"
+                        class="speed-btn bg-blue-500 text-white px-3 py-1 rounded-lg text-sm">1x</button>
+                    <button onclick="setSpeed(1.25)"
+                        class="speed-btn bg-gray-100 hover:bg-blue-100 px-3 py-1 rounded-lg text-sm transition-colors">1.25x</button>
+                </div>
+
+                <!-- Play Counter -->
+                <div class="text-sm text-gray-500">
+                    Reproduções: <span id="play-count">0</span>/3 (máximo recomendado)
+                </div>
+            </div>
+        </div>
+
+        <!-- Exercise Content -->
+        <div class="bg-white rounded-3xl shadow-2xl p-8 mb-8" id="exercise-content">
+            <!-- Content will be dynamically loaded here -->
+        </div>
+
+        <!-- Feedback Section -->
+        <div class="text-center" id="feedback-section" style="display: none;">
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-6" id="feedback-card">
+                <div class="text-6xl mb-4" id="feedback-emoji">🎉</div>
+                <div class="text-2xl font-bold mb-2" id="feedback-title">Excelente!</div>
+                <div class="text-gray-600 mb-4" id="feedback-text">Sua compreensão auditiva está ótima!</div>
+                <div class="bg-blue-50 rounded-xl p-4 mb-4" id="explanation">
+                    <h4 class="font-semibold text-blue-800 mb-2">🎧 Transcrição</h4>
+                    <p class="text-blue-700 text-sm" id="transcript-text">O áudio dizia: "I'm going to the supermarket
+                        to buy some groceries."</p>
+                </div>
+            </div>
+            <button onclick="nextExercise()"
+                class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-600 transition-all transform hover:scale-105">
+                Próximo Exercício →
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let gameState = {
+            score: 0,
+            currentExercise: 1,
+            totalExercises: 8,
+            correctAnswers: 0,
+            playCount: 0,
+            currentSpeed: 1,
+            isPlaying: false,
+            exercises: [
+                {
+                    type: 'visual',
+                    icon: '🖼️',
+                    title: 'Identificação Visual',
+                    instruction: 'Ouça o áudio e selecione a imagem que melhor representa o que foi falado.',
+                    audioText: "I'm going to the supermarket to buy some groceries.",
+                    options: [
+                        { image: '🛒', text: 'Supermercado', correct: true },
+                        { image: '🏥', text: 'Hospital', correct: false },
+                        { image: '🏫', text: 'Escola', correct: false },
+                        { image: '🏦', text: 'Banco', correct: false }
+                    ]
+                },
+                {
+                    type: 'verb',
+                    icon: '🔤',
+                    title: 'Identificação de Verbo',
+                    instruction: 'Ouça a frase e identifique o verbo principal.',
+                    audioText: "She has been studying English for three years.",
+                    options: [
+                        { text: 'studying', correct: true },
+                        { text: 'has', correct: false },
+                        { text: 'been', correct: false },
+                        { text: 'years', correct: false }
+                    ]
+                },
+                {
+                    type: 'transcript',
+                    icon: '✍️',
+                    title: 'Transcrição Completa',
+                    instruction: 'Ouça o áudio e escreva exatamente o que foi falado.',
+                    audioText: "The weather is beautiful today.",
+                    correctTranscript: "The weather is beautiful today."
+                }
+            ]
+        };
+
+        // Initialize
+        function initGame() {
+            generateWaveform();
+            updateUI();
+            loadExercise();
+        }
+
+        // Generate waveform visualization
+        function generateWaveform() {
+            const waveform = document.getElementById('waveform');
+            waveform.innerHTML = '';
+
+            for (let i = 0; i < 40; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'waveform-bar audio-wave';
+                bar.style.height = Math.random() * 40 + 10 + 'px';
+                bar.style.animationDelay = Math.random() * 2 + 's';
+                waveform.appendChild(bar);
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('accuracy').textContent = Math.round((gameState.correctAnswers / Math.max(gameState.currentExercise - 1, 1)) * 100) + '%';
+            document.getElementById('progress-text').textContent = `${gameState.currentExercise}/${gameState.totalExercises}`;
+            document.getElementById('progress-bar').style.width = `${(gameState.currentExercise / gameState.totalExercises) * 100}%`;
+            document.getElementById('play-count').textContent = gameState.playCount;
+        }
+
+        // Load current exercise
+        function loadExercise() {
+            const exercise = gameState.exercises[(gameState.currentExercise - 1) % gameState.exercises.length];
+
+            document.getElementById('exercise-icon').textContent = exercise.icon;
+            document.getElementById('exercise-type').textContent = exercise.title;
+            document.getElementById('exercise-instruction').textContent = exercise.instruction;
+
+            const content = document.getElementById('exercise-content');
+
+            if (exercise.type === 'visual') {
+                content.innerHTML = `
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">Selecione a imagem correta:</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6" id="visual-options">
+                        ${exercise.options.map((option, index) => `
+                            <div class="photo-option bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 rounded-2xl p-6 cursor-pointer hover:border-blue-300 transition-all photo-hover text-center" onclick="selectVisualOption(${index}, this)">
+                                <div class="text-6xl mb-4">${option.image}</div>
+                                <div class="font-semibold text-gray-700">${option.text}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (exercise.type === 'verb') {
+                content.innerHTML = `
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">Qual é o verbo principal?</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="verb-options">
+                        ${exercise.options.map((option, index) => `
+                            <button class="verb-option bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-all font-semibold text-gray-700 hover:bg-blue-100" onclick="selectVerbOption(${index}, this)">
+                                ${option.text}
+                            </button>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (exercise.type === 'transcript') {
+                content.innerHTML = `
+                    <h3 class="text-xl font-semibold text-gray-800 mb-6 text-center">Escreva o que você ouviu:</h3>
+                    <div class="max-w-2xl mx-auto">
+                        <textarea 
+                            id="transcript-input" 
+                            class="transcript-input w-full h-32 p-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 text-gray-700"
+                            placeholder="Digite aqui o que você ouviu..."
+                        ></textarea>
+                        <div class="text-center mt-6">
+                            <button onclick="checkTranscript()" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all">
+                                Verificar Transcrição
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Reset audio state
+            gameState.playCount = 0;
+            gameState.isPlaying = false;
+            document.getElementById('play-btn').innerHTML = '<span class="text-2xl">▶️</span>';
+            document.getElementById('waveform').classList.remove('audio-playing');
+            document.getElementById('feedback-section').style.display = 'none';
+
+            updateUI();
+        }
+
+        // Audio controls
+        function toggleAudio() {
+            const playBtn = document.getElementById('play-btn');
+            const waveform = document.getElementById('waveform');
+
+            if (!gameState.isPlaying) {
+                // Start playing
+                gameState.isPlaying = true;
+                gameState.playCount++;
+                playBtn.innerHTML = '<span class="text-2xl">⏸️</span>';
+                waveform.classList.add('audio-playing');
+
+                // Simulate audio duration (3 seconds)
+                setTimeout(() => {
+                    gameState.isPlaying = false;
+                    playBtn.innerHTML = '<span class="text-2xl">▶️</span>';
+                    waveform.classList.remove('audio-playing');
+                    updateUI();
+                }, 3000);
+
+            } else {
+                // Stop playing
+                gameState.isPlaying = false;
+                playBtn.innerHTML = '<span class="text-2xl">▶️</span>';
+                waveform.classList.remove('audio-playing');
+            }
+
+            updateUI();
+        }
+
+        function rewindAudio() {
+            // Simulate rewind
+            if (gameState.isPlaying) {
+                toggleAudio();
+            }
+        }
+
+        function forwardAudio() {
+            // Simulate forward
+            if (gameState.isPlaying) {
+                toggleAudio();
+            }
+        }
+
+        function setSpeed(speed) {
+            gameState.currentSpeed = speed;
+
+            // Update speed buttons
+            document.querySelectorAll('.speed-btn').forEach(btn => {
+                btn.className = 'speed-btn bg-gray-100 hover:bg-blue-100 px-3 py-1 rounded-lg text-sm transition-colors';
+            });
+
+            event.target.className = 'speed-btn bg-blue-500 text-white px-3 py-1 rounded-lg text-sm';
+        }
+
+        // Exercise interactions
+        function selectVisualOption(index, element) {
+            const exercise = gameState.exercises[(gameState.currentExercise - 1) % gameState.exercises.length];
+            const isCorrect = exercise.options[index].correct;
+
+            // Disable all options
+            document.querySelectorAll('.photo-option').forEach(option => {
+                option.style.pointerEvents = 'none';
+            });
+
+            if (isCorrect) {
+                element.className = 'photo-option bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-2xl p-6 text-center pulse-success';
+                gameState.score += 15;
+                gameState.correctAnswers++;
+                showFeedback(true, exercise.audioText);
+            } else {
+                element.className = 'photo-option bg-gradient-to-br from-red-100 to-red-200 border-2 border-red-400 rounded-2xl p-6 text-center shake';
+
+                // Highlight correct answer
+                document.querySelectorAll('.photo-option').forEach((option, i) => {
+                    if (exercise.options[i].correct) {
+                        option.className = 'photo-option bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-2xl p-6 text-center';
+                    }
+                });
+
+                showFeedback(false, exercise.audioText);
+            }
+
+            updateUI();
+        }
+
+        function selectVerbOption(index, element) {
+            const exercise = gameState.exercises[(gameState.currentExercise - 1) % gameState.exercises.length];
+            const isCorrect = exercise.options[index].correct;
+
+            // Disable all options
+            document.querySelectorAll('.verb-option').forEach(option => {
+                option.style.pointerEvents = 'none';
+            });
+
+            if (isCorrect) {
+                element.className = 'verb-option bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-xl p-4 font-semibold text-gray-700 pulse-success';
+                gameState.score += 15;
+                gameState.correctAnswers++;
+                showFeedback(true, exercise.audioText);
+            } else {
+                element.className = 'verb-option bg-gradient-to-br from-red-100 to-red-200 border-2 border-red-400 rounded-xl p-4 font-semibold text-gray-700 shake';
+
+                // Highlight correct answer
+                document.querySelectorAll('.verb-option').forEach((option, i) => {
+                    if (exercise.options[i].correct) {
+                        option.className = 'verb-option bg-gradient-to-br from-green-100 to-green-200 border-2 border-green-400 rounded-xl p-4 font-semibold text-gray-700';
+                    }
+                });
+
+                showFeedback(false, exercise.audioText);
+            }
+
+            updateUI();
+        }
+
+        function checkTranscript() {
+            const exercise = gameState.exercises[(gameState.currentExercise - 1) % gameState.exercises.length];
+            const userInput = document.getElementById('transcript-input').value.trim().toLowerCase();
+            const correctTranscript = exercise.correctTranscript.toLowerCase();
+
+            // Simple similarity check (in real app, use more sophisticated matching)
+            const similarity = calculateSimilarity(userInput, correctTranscript);
+            const isCorrect = similarity > 0.8;
+
+            if (isCorrect) {
+                document.getElementById('transcript-input').className = 'transcript-input w-full h-32 p-4 border-2 border-green-400 rounded-xl focus:outline-none bg-green-50 text-gray-700';
+                gameState.score += 20;
+                gameState.correctAnswers++;
+                showFeedback(true, exercise.audioText);
+            } else {
+                document.getElementById('transcript-input').className = 'transcript-input w-full h-32 p-4 border-2 border-red-400 rounded-xl focus:outline-none bg-red-50 text-gray-700 shake';
+                showFeedback(false, exercise.audioText);
+            }
+
+            updateUI();
+        }
+
+        // Simple similarity calculation
+        function calculateSimilarity(str1, str2) {
+            const words1 = str1.split(' ');
+            const words2 = str2.split(' ');
+            const commonWords = words1.filter(word => words2.includes(word));
+            return commonWords.length / Math.max(words1.length, words2.length);
+        }
+
+        // Show feedback
+        function showFeedback(isCorrect, audioText) {
+            const feedbackSection = document.getElementById('feedback-section');
+            const feedbackEmoji = document.getElementById('feedback-emoji');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackText = document.getElementById('feedback-text');
+            const transcriptText = document.getElementById('transcript-text');
+
+            if (isCorrect) {
+                feedbackEmoji.textContent = '🎉';
+                feedbackTitle.textContent = 'Excelente!';
+                feedbackText.textContent = 'Sua compreensão auditiva está ótima!';
+                document.getElementById('feedback-card').className = 'bg-gradient-to-br from-green-50 to-green-100 rounded-2xl shadow-lg p-6 mb-6';
+            } else {
+                feedbackEmoji.textContent = '🎧';
+                feedbackTitle.textContent = 'Continue praticando!';
+                feedbackText.textContent = 'Ouça novamente e tente identificar as palavras-chave.';
+                document.getElementById('feedback-card').className = 'bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl shadow-lg p-6 mb-6';
+            }
+
+            transcriptText.textContent = `O áudio dizia: "${audioText}"`;
+            feedbackSection.style.display = 'block';
+            feedbackSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Next exercise
+        function nextExercise() {
+            if (gameState.currentExercise < gameState.totalExercises) {
+                gameState.currentExercise++;
+                loadExercise();
+            } else {
+                showGameComplete();
+            }
+        }
+
+        // Show completion
+        function showGameComplete() {
+            document.getElementById('exercise-content').innerHTML = `
+                <div class="text-center">
+                    <div class="text-8xl mb-6">🎧</div>
+                    <h2 class="text-3xl font-bold text-gray-800 mb-4">Sessão Concluída!</h2>
+                    <p class="text-xl text-gray-600 mb-6">Parabéns pelo seu desempenho no listening!</p>
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6">
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">${gameState.score}</div>
+                                <div class="text-sm text-gray-600">Pontos</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-green-600">${gameState.correctAnswers}/${gameState.totalExercises}</div>
+                                <div class="text-sm text-gray-600">Acertos</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-purple-600">${Math.round((gameState.correctAnswers / gameState.totalExercises) * 100)}%</div>
+                                <div class="text-sm text-gray-600">Precisão</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <button onclick="window.history.back()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-4 rounded-2xl font-bold text-lg hover:from-blue-600 hover:to-purple-700 transition-all">
+                            Voltar ao Dashboard
+                        </button>
+                        <button onclick="location.reload()" class="w-full bg-gray-200 text-gray-700 py-4 rounded-2xl font-bold text-lg hover:bg-gray-300 transition-all">
+                            Nova Sessão
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('feedback-section').style.display = 'none';
+        }
+
+        // Go back
+        function goBack() {
+            if (confirm('Tem certeza que deseja sair? Seu progresso será perdido.')) {
+                window.history.back();
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9760b73665b2d917',t:'MTc1NjM1MTY3Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>

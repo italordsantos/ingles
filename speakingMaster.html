@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaking Master - Treine sua Pronúncia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); }
+        
+        .speaking-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .speaking-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .recording-active {
+            animation: recordingPulse 1.5s ease-in-out infinite;
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+        }
+        
+        @keyframes recordingPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(239, 68, 68, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(239, 68, 68, 0.8); }
+        }
+        
+        .waveform {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            height: 60px;
+        }
+        
+        .wave-bar {
+            width: 4px;
+            background: linear-gradient(to top, #3b82f6, #8b5cf6);
+            border-radius: 2px;
+            animation: waveAnimation 1.5s ease-in-out infinite;
+        }
+        
+        .wave-bar:nth-child(1) { animation-delay: 0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+        .wave-bar:nth-child(6) { animation-delay: 0.5s; }
+        .wave-bar:nth-child(7) { animation-delay: 0.4s; }
+        .wave-bar:nth-child(8) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(9) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(10) { animation-delay: 0.1s; }
+        
+        @keyframes waveAnimation {
+            0%, 100% { height: 10px; }
+            50% { height: 40px; }
+        }
+        
+        .pronunciation-score {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            position: relative;
+        }
+        
+        .score-excellent { background: linear-gradient(135deg, #10b981, #059669); }
+        .score-good { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .score-needs-work { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        
+        .phonetic-text {
+            font-family: 'Courier New', monospace;
+            color: #8b5cf6;
+            font-size: 1.2em;
+            letter-spacing: 1px;
+        }
+        
+        .word-syllable {
+            display: inline-block;
+            padding: 4px 8px;
+            margin: 2px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .syllable-correct {
+            background: linear-gradient(135deg, #10b981, #059669);
+            animation: syllableCorrect 0.6s ease-in-out;
+        }
+        
+        .syllable-incorrect {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: syllableIncorrect 0.6s ease-in-out;
+        }
+        
+        @keyframes syllableCorrect {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes syllableIncorrect {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        
+        .speaking-level-beginner { border-left: 4px solid #10b981; }
+        .speaking-level-intermediate { border-left: 4px solid #f59e0b; }
+        .speaking-level-advanced { border-left: 4px solid #ef4444; }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dasharray 0.5s ease;
+        }
+        
+        .tongue-twister-card {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+        }
+        
+        .conversation-card {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+        
+        .pronunciation-card {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+        }
+        
+        .reading-card {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .feedback-positive {
+            background: linear-gradient(135deg, #10b981, #059669);
+            animation: feedbackAppear 0.5s ease-out;
+        }
+        
+        .feedback-negative {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            animation: feedbackAppear 0.5s ease-out;
+        }
+        
+        @keyframes feedbackAppear {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .speaking-tip {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            animation: tipGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes tipGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+            50% { box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); }
+        }
+        
+        .accent-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .accent-option {
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .accent-option.active {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-color: #60a5fa;
+        }
+        
+        .difficulty-stars {
+            display: flex;
+            gap: 2px;
+        }
+        
+        .star-filled { color: #fbbf24; }
+        .star-empty { color: #6b7280; }
+        
+        .speaking-exercise {
+            transition: all 0.3s ease;
+        }
+        
+        .speaking-exercise:hover {
+            transform: scale(1.02);
+        }
+        
+        .voice-analysis {
+            background: linear-gradient(135deg, #1f2937, #111827);
+            border-radius: 20px;
+            padding: 20px;
+        }
+        
+        .pitch-indicator {
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(to right, #ef4444, #f59e0b, #10b981);
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .pitch-marker {
+            position: absolute;
+            top: -2px;
+            width: 4px;
+            height: 12px;
+            background: white;
+            border-radius: 2px;
+            transition: left 0.3s ease;
+        }
+        
+        .speed-meter {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .speed-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .speed-fill {
+            height: 100%;
+            background: linear-gradient(to right, #10b981, #3b82f6);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .recording-timer {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ef4444;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .exercise-completed {
+            background: linear-gradient(135deg, #10b981, #059669);
+            opacity: 0.8;
+        }
+        
+        .exercise-current {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .exercise-locked {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 min-h-screen text-white">
+    <!-- Header -->
+    <header class="gradient-bg shadow-2xl">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors">
+                        <span class="text-xl">←</span>
+                    </button>
+                    <div>
+                        <h1 class="text-3xl font-black flex items-center">
+                            🗣️ SPEAKING MASTER
+                        </h1>
+                        <p class="text-blue-100">Treine sua Pronúncia e Fluência</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <!-- Speaking Level -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-red-400" id="speaking-level">Nível 5</div>
+                        <div class="text-xs text-blue-100">Speaking</div>
+                    </div>
+                    
+                    <!-- Pronunciation Score -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-400" id="pronunciation-score">87%</div>
+                        <div class="text-xs text-blue-100">Pronúncia</div>
+                    </div>
+                    
+                    <!-- Words Practiced -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-400" id="words-practiced">342</div>
+                        <div class="text-xs text-blue-100">Palavras</div>
+                    </div>
+                    
+                    <!-- Speaking Time -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-yellow-400" id="speaking-time">2h 15m</div>
+                        <div class="text-xs text-blue-100">Tempo Falado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Main Dashboard -->
+        <div id="speaking-dashboard">
+            <!-- Quick Practice Options -->
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
+                <!-- Pronunciation Practice -->
+                <div class="pronunciation-card rounded-3xl p-8 speaking-card" onclick="startPronunciationPractice()">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🎯</div>
+                        <h3 class="text-xl font-bold mb-4">Pronúncia</h3>
+                        <div class="text-sm text-blue-200 mb-4">Pratique sons específicos</div>
+                        <div class="difficulty-stars mb-4">
+                            <span class="star-filled">★</span>
+                            <span class="star-filled">★</span>
+                            <span class="star-empty">★</span>
+                        </div>
+                        <button class="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-xl font-bold transition-all">
+                            Começar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tongue Twisters -->
+                <div class="tongue-twister-card rounded-3xl p-8 speaking-card" onclick="startTongueTwisters()">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🌪️</div>
+                        <h3 class="text-xl font-bold mb-4">Trava-Línguas</h3>
+                        <div class="text-sm text-pink-200 mb-4">Desafie sua articulação</div>
+                        <div class="difficulty-stars mb-4">
+                            <span class="star-filled">★</span>
+                            <span class="star-filled">★</span>
+                            <span class="star-filled">★</span>
+                        </div>
+                        <button class="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-xl font-bold transition-all">
+                            Começar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Conversation Practice -->
+                <div class="conversation-card rounded-3xl p-8 speaking-card" onclick="startConversationPractice()">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">💬</div>
+                        <h3 class="text-xl font-bold mb-4">Conversação</h3>
+                        <div class="text-sm text-purple-200 mb-4">Diálogos interativos</div>
+                        <div class="difficulty-stars mb-4">
+                            <span class="star-filled">★</span>
+                            <span class="star-filled">★</span>
+                            <span class="star-empty">★</span>
+                        </div>
+                        <button class="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-xl font-bold transition-all">
+                            Começar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Reading Aloud -->
+                <div class="reading-card rounded-3xl p-8 speaking-card" onclick="startReadingPractice()">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">📖</div>
+                        <h3 class="text-xl font-bold mb-4">Leitura</h3>
+                        <div class="text-sm text-green-200 mb-4">Leia em voz alta</div>
+                        <div class="difficulty-stars mb-4">
+                            <span class="star-filled">★</span>
+                            <span class="star-empty">★</span>
+                            <span class="star-empty">★</span>
+                        </div>
+                        <button class="bg-white/20 hover:bg-white/30 px-6 py-3 rounded-xl font-bold transition-all">
+                            Começar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Speaking Challenge -->
+            <div class="mb-12">
+                <div class="bg-gradient-to-br from-orange-500/20 to-red-500/20 rounded-3xl p-8">
+                    <div class="text-center mb-8">
+                        <div class="text-6xl mb-4">🏆</div>
+                        <h2 class="text-3xl font-bold mb-4">Desafio Diário de Speaking</h2>
+                        <div class="text-lg text-orange-200 mb-6">Fale por 5 minutos sobre o tópico do dia!</div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                            <h3 class="text-xl font-bold mb-4">Tópico de Hoje</h3>
+                            <div class="text-2xl font-bold text-orange-400 mb-4">"Describe your perfect weekend"</div>
+                            <div class="text-sm text-gray-300 mb-4">
+                                Fale sobre como seria seu fim de semana perfeito. Inclua atividades, lugares e pessoas.
+                            </div>
+                            <div class="speaking-tip">
+                                <div class="font-bold mb-2">💡 Dica do Dia:</div>
+                                <div class="text-sm">Use expressões como "I would love to...", "My ideal weekend would include..." para soar mais natural!</div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                            <h3 class="text-xl font-bold mb-4">Seu Progresso</h3>
+                            <div class="space-y-4">
+                                <div class="flex justify-between items-center">
+                                    <span>Tempo falado hoje:</span>
+                                    <span class="font-bold text-green-400">3min 42s</span>
+                                </div>
+                                <div class="w-full bg-gray-700 rounded-full h-3">
+                                    <div class="bg-gradient-to-r from-orange-500 to-red-500 h-3 rounded-full" style="width: 74%"></div>
+                                </div>
+                                <div class="text-center">
+                                    <button onclick="startDailyChallenge()" class="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 rounded-2xl font-bold text-lg hover:from-orange-600 hover:to-red-600 transition-all">
+                                        Continuar Desafio
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Speaking Exercises -->
+            <div class="mb-12">
+                <h2 class="text-3xl font-bold mb-6 text-center">Exercícios de Speaking</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="speaking-exercises">
+                    <!-- Exercises will be generated here -->
+                </div>
+            </div>
+
+            <!-- Progress Overview -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Speaking Analytics -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8">
+                    <h3 class="text-2xl font-bold mb-6">Análise de Fala</h3>
+                    
+                    <!-- Pronunciation Accuracy -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">Precisão da Pronúncia</span>
+                            <span class="text-green-400 font-bold">87%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full" style="width: 87%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Speaking Speed -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">Velocidade de Fala</span>
+                            <span class="text-blue-400 font-bold">145 WPM</span>
+                        </div>
+                        <div class="speed-meter">
+                            <span class="text-xs">Lento</span>
+                            <div class="speed-bar">
+                                <div class="speed-fill" style="width: 72%"></div>
+                            </div>
+                            <span class="text-xs">Rápido</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Fluency Score -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">Fluência</span>
+                            <span class="text-purple-400 font-bold">8.2/10</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-3">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full" style="width: 82%"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pitch Analysis -->
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">Variação de Tom</span>
+                            <span class="text-yellow-400 font-bold">Boa</span>
+                        </div>
+                        <div class="pitch-indicator">
+                            <div class="pitch-marker" style="left: 65%"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-400 mt-1">
+                            <span>Monótono</span>
+                            <span>Expressivo</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Achievements -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8">
+                    <h3 class="text-2xl font-bold mb-6">Conquistas Recentes</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
+                            <div class="text-4xl">🎯</div>
+                            <div>
+                                <div class="font-bold text-green-400">Pronunciation Master</div>
+                                <div class="text-sm text-gray-300">90% de precisão em 50 palavras</div>
+                                <div class="text-xs text-yellow-400">+100 XP</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
+                            <div class="text-4xl">🌪️</div>
+                            <div>
+                                <div class="font-bold text-pink-400">Tongue Twister Champion</div>
+                                <div class="text-sm text-gray-300">10 trava-línguas completados</div>
+                                <div class="text-xs text-yellow-400">+75 XP</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
+                            <div class="text-4xl">⏱️</div>
+                            <div>
+                                <div class="font-bold text-blue-400">Speed Speaker</div>
+                                <div class="text-sm text-gray-300">Falou por 30 minutos hoje</div>
+                                <div class="text-xs text-yellow-400">+50 XP</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4 p-4 bg-white/5 rounded-lg">
+                            <div class="text-4xl">🔥</div>
+                            <div>
+                                <div class="font-bold text-orange-400">Speaking Streak</div>
+                                <div class="text-sm text-gray-300">7 dias consecutivos praticando</div>
+                                <div class="text-xs text-yellow-400">+200 XP</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pronunciation Practice Interface (Hidden Initially) -->
+        <div id="pronunciation-interface" style="display: none;">
+            <div class="max-w-4xl mx-auto">
+                <!-- Practice Header -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="text-2xl font-bold">Prática de Pronúncia</h3>
+                            <div class="text-sm text-gray-300" id="pronunciation-category">Categoria: Vogais</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold text-blue-400" id="pronunciation-progress">5/20</div>
+                            <div class="text-sm text-gray-300">Palavras</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Word Practice -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 mb-8">
+                    <div class="text-center mb-8">
+                        <div class="text-8xl mb-6" id="word-emoji">🍎</div>
+                        <div class="text-4xl font-bold mb-4" id="current-word">Apple</div>
+                        <div class="phonetic-text mb-6" id="phonetic-spelling">/ˈæpəl/</div>
+                        <div class="text-lg text-gray-300 mb-8" id="word-meaning">Uma fruta vermelha ou verde</div>
+                        
+                        <!-- Syllable Breakdown -->
+                        <div class="mb-8">
+                            <h4 class="text-lg font-bold mb-4">Divisão Silábica:</h4>
+                            <div id="syllable-breakdown">
+                                <span class="word-syllable">Ap</span>
+                                <span class="word-syllable">ple</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recording Controls -->
+                    <div class="text-center mb-8">
+                        <div class="mb-6">
+                            <button onclick="playExample()" class="bg-gradient-to-r from-green-500 to-emerald-500 px-8 py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-emerald-600 transition-all mr-4">
+                                🔊 Ouvir Exemplo
+                            </button>
+                            <button onclick="toggleRecording()" id="record-button" class="bg-gradient-to-r from-red-500 to-pink-500 px-8 py-4 rounded-2xl font-bold text-lg hover:from-red-600 hover:to-pink-600 transition-all">
+                                🎤 Gravar
+                            </button>
+                        </div>
+                        
+                        <!-- Recording Timer -->
+                        <div class="recording-timer" id="recording-timer" style="display: none;">00:00</div>
+                        
+                        <!-- Waveform Visualization -->
+                        <div class="waveform mb-6" id="waveform" style="display: none;">
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                            <div class="wave-bar"></div>
+                        </div>
+                    </div>
+
+                    <!-- Pronunciation Score -->
+                    <div class="text-center" id="pronunciation-result" style="display: none;">
+                        <div class="pronunciation-score score-excellent mx-auto mb-6" id="score-circle">
+                            <span id="score-text">92%</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="text-2xl font-bold text-green-400" id="accuracy-score">92%</div>
+                                <div class="text-sm text-gray-300">Precisão</div>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="text-2xl font-bold text-blue-400" id="fluency-score">8.5</div>
+                                <div class="text-sm text-gray-300">Fluência</div>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-4">
+                                <div class="text-2xl font-bold text-purple-400" id="completeness-score">95%</div>
+                                <div class="text-sm text-gray-300">Completude</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detailed Feedback -->
+                        <div class="bg-white/5 rounded-lg p-6 mb-6" id="detailed-feedback">
+                            <h4 class="font-bold mb-4">Feedback Detalhado:</h4>
+                            <div class="text-left space-y-2" id="feedback-list">
+                                <!-- Feedback items will be added here -->
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-center space-x-4">
+                            <button onclick="tryAgain()" class="bg-gradient-to-r from-yellow-500 to-orange-500 px-6 py-3 rounded-xl font-bold hover:from-yellow-600 hover:to-orange-600 transition-all">
+                                🔄 Tentar Novamente
+                            </button>
+                            <button onclick="nextWord()" class="bg-gradient-to-r from-blue-500 to-purple-500 px-6 py-3 rounded-xl font-bold hover:from-blue-600 hover:to-purple-600 transition-all">
+                                ➡️ Próxima Palavra
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Accent Selection -->
+                <div class="bg-white/10 backdrop-blur-lg rounded-2xl p-6">
+                    <h4 class="font-bold mb-4">Escolha o Sotaque:</h4>
+                    <div class="accent-selector">
+                        <div class="accent-option active" onclick="selectAccent('american')">
+                            🇺🇸 Americano
+                        </div>
+                        <div class="accent-option" onclick="selectAccent('british')">
+                            🇬🇧 Britânico
+                        </div>
+                        <div class="accent-option" onclick="selectAccent('australian')">
+                            🇦🇺 Australiano
+                        </div>
+                        <div class="accent-option" onclick="selectAccent('canadian')">
+                            🇨🇦 Canadense
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let speakingState = {
+            currentMode: 'dashboard',
+            isRecording: false,
+            recordingStartTime: null,
+            recordingTimer: null,
+            currentWord: 0,
+            selectedAccent: 'american',
+            pronunciationWords: [
+                {
+                    word: 'Apple',
+                    phonetic: '/ˈæpəl/',
+                    meaning: 'Uma fruta vermelha ou verde',
+                    syllables: ['Ap', 'ple'],
+                    emoji: '🍎',
+                    difficulty: 1
+                },
+                {
+                    word: 'Beautiful',
+                    phonetic: '/ˈbjuːtɪfəl/',
+                    meaning: 'Algo que é bonito de se ver',
+                    syllables: ['Beau', 'ti', 'ful'],
+                    emoji: '🌸',
+                    difficulty: 2
+                },
+                {
+                    word: 'Comfortable',
+                    phonetic: '/ˈkʌmftəbəl/',
+                    meaning: 'Algo que proporciona conforto',
+                    syllables: ['Com', 'for', 'ta', 'ble'],
+                    emoji: '🛋️',
+                    difficulty: 3
+                },
+                {
+                    word: 'Extraordinary',
+                    phonetic: '/ɪkˈstrɔːdɪnəri/',
+                    meaning: 'Algo muito especial ou incomum',
+                    syllables: ['Ex', 'tra', 'or', 'di', 'na', 'ry'],
+                    emoji: '✨',
+                    difficulty: 4
+                },
+                {
+                    word: 'Pronunciation',
+                    phonetic: '/prəˌnʌnsiˈeɪʃən/',
+                    meaning: 'A forma como as palavras são faladas',
+                    syllables: ['Pro', 'nun', 'ci', 'a', 'tion'],
+                    emoji: '🗣️',
+                    difficulty: 5
+                }
+            ]
+        };
+
+        // Start Pronunciation Practice
+        function startPronunciationPractice() {
+            showPronunciationInterface();
+            initializePronunciationPractice();
+        }
+
+        // Show pronunciation interface
+        function showPronunciationInterface() {
+            document.getElementById('speaking-dashboard').style.display = 'none';
+            document.getElementById('pronunciation-interface').style.display = 'block';
+            speakingState.currentMode = 'pronunciation';
+        }
+
+        // Initialize pronunciation practice
+        function initializePronunciationPractice() {
+            speakingState.currentWord = 0;
+            loadCurrentWord();
+            updatePronunciationProgress();
+        }
+
+        // Load current word
+        function loadCurrentWord() {
+            const word = speakingState.pronunciationWords[speakingState.currentWord];
+            
+            document.getElementById('word-emoji').textContent = word.emoji;
+            document.getElementById('current-word').textContent = word.word;
+            document.getElementById('phonetic-spelling').textContent = word.phonetic;
+            document.getElementById('word-meaning').textContent = word.meaning;
+            
+            // Load syllables
+            const syllableContainer = document.getElementById('syllable-breakdown');
+            syllableContainer.innerHTML = '';
+            word.syllables.forEach(syllable => {
+                const span = document.createElement('span');
+                span.className = 'word-syllable';
+                span.textContent = syllable;
+                syllableContainer.appendChild(span);
+            });
+            
+            // Reset UI
+            document.getElementById('pronunciation-result').style.display = 'none';
+            document.getElementById('record-button').textContent = '🎤 Gravar';
+            document.getElementById('record-button').classList.remove('recording-active');
+        }
+
+        // Update pronunciation progress
+        function updatePronunciationProgress() {
+            const progress = `${speakingState.currentWord + 1}/${speakingState.pronunciationWords.length}`;
+            document.getElementById('pronunciation-progress').textContent = progress;
+        }
+
+        // Play example pronunciation
+        function playExample() {
+            // Simulate playing audio
+            const button = event.target;
+            button.textContent = '🔊 Reproduzindo...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.textContent = '🔊 Ouvir Exemplo';
+                button.disabled = false;
+            }, 2000);
+        }
+
+        // Toggle recording
+        function toggleRecording() {
+            if (speakingState.isRecording) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        }
+
+        // Start recording
+        function startRecording() {
+            speakingState.isRecording = true;
+            speakingState.recordingStartTime = Date.now();
+            
+            const recordButton = document.getElementById('record-button');
+            recordButton.classList.add('recording-active');
+            recordButton.textContent = '⏹️ Parar';
+            
+            // Show waveform and timer
+            document.getElementById('waveform').style.display = 'flex';
+            document.getElementById('recording-timer').style.display = 'block';
+            
+            // Start timer
+            speakingState.recordingTimer = setInterval(updateRecordingTimer, 100);
+            
+            // Simulate recording for 3 seconds then auto-stop
+            setTimeout(() => {
+                if (speakingState.isRecording) {
+                    stopRecording();
+                }
+            }, 5000);
+        }
+
+        // Stop recording
+        function stopRecording() {
+            speakingState.isRecording = false;
+            
+            const recordButton = document.getElementById('record-button');
+            recordButton.classList.remove('recording-active');
+            recordButton.textContent = '🎤 Gravar';
+            
+            // Hide waveform and timer
+            document.getElementById('waveform').style.display = 'none';
+            document.getElementById('recording-timer').style.display = 'none';
+            
+            // Clear timer
+            if (speakingState.recordingTimer) {
+                clearInterval(speakingState.recordingTimer);
+                speakingState.recordingTimer = null;
+            }
+            
+            // Analyze pronunciation
+            setTimeout(() => {
+                analyzePronunciation();
+            }, 1000);
+        }
+
+        // Update recording timer
+        function updateRecordingTimer() {
+            if (speakingState.recordingStartTime) {
+                const elapsed = Date.now() - speakingState.recordingStartTime;
+                const seconds = Math.floor(elapsed / 1000);
+                const milliseconds = Math.floor((elapsed % 1000) / 100);
+                document.getElementById('recording-timer').textContent = 
+                    `${seconds.toString().padStart(2, '0')}:${milliseconds}`;
+            }
+        }
+
+        // Analyze pronunciation
+        function analyzePronunciation() {
+            // Simulate AI analysis
+            const accuracy = Math.floor(Math.random() * 20) + 80; // 80-100%
+            const fluency = (Math.random() * 2 + 8).toFixed(1); // 8.0-10.0
+            const completeness = Math.floor(Math.random() * 10) + 90; // 90-100%
+            
+            // Update scores
+            document.getElementById('score-text').textContent = accuracy + '%';
+            document.getElementById('accuracy-score').textContent = accuracy + '%';
+            document.getElementById('fluency-score').textContent = fluency;
+            document.getElementById('completeness-score').textContent = completeness + '%';
+            
+            // Update score circle color
+            const scoreCircle = document.getElementById('score-circle');
+            scoreCircle.className = 'pronunciation-score mx-auto mb-6';
+            if (accuracy >= 90) {
+                scoreCircle.classList.add('score-excellent');
+            } else if (accuracy >= 75) {
+                scoreCircle.classList.add('score-good');
+            } else {
+                scoreCircle.classList.add('score-needs-work');
+            }
+            
+            // Generate feedback
+            generatePronunciationFeedback(accuracy, fluency, completeness);
+            
+            // Highlight syllables
+            highlightSyllables(accuracy);
+            
+            // Show results
+            document.getElementById('pronunciation-result').style.display = 'block';
+        }
+
+        // Generate pronunciation feedback
+        function generatePronunciationFeedback(accuracy, fluency, completeness) {
+            const feedbackList = document.getElementById('feedback-list');
+            feedbackList.innerHTML = '';
+            
+            const feedbacks = [];
+            
+            if (accuracy >= 90) {
+                feedbacks.push({
+                    type: 'positive',
+                    text: '✅ Excelente pronúncia! Você está falando muito claramente.'
+                });
+            } else if (accuracy >= 75) {
+                feedbacks.push({
+                    type: 'neutral',
+                    text: '⚠️ Boa pronúncia, mas há espaço para melhorar alguns sons.'
+                });
+            } else {
+                feedbacks.push({
+                    type: 'negative',
+                    text: '❌ Precisa praticar mais. Tente falar mais devagar e articular melhor.'
+                });
+            }
+            
+            if (fluency >= 9.0) {
+                feedbacks.push({
+                    type: 'positive',
+                    text: '✅ Sua fluência está excelente! Ritmo natural e bem pausado.'
+                });
+            } else if (fluency >= 7.5) {
+                feedbacks.push({
+                    type: 'neutral',
+                    text: '⚠️ Boa fluência, mas tente manter um ritmo mais consistente.'
+                });
+            } else {
+                feedbacks.push({
+                    type: 'negative',
+                    text: '❌ Trabalhe na fluência. Tente falar com mais confiança e menos hesitação.'
+                });
+            }
+            
+            if (completeness >= 95) {
+                feedbacks.push({
+                    type: 'positive',
+                    text: '✅ Você pronunciou a palavra completa perfeitamente!'
+                });
+            } else {
+                feedbacks.push({
+                    type: 'neutral',
+                    text: '⚠️ Certifique-se de pronunciar todas as sílabas da palavra.'
+                });
+            }
+            
+            feedbacks.forEach(feedback => {
+                const div = document.createElement('div');
+                div.className = `p-3 rounded-lg mb-2 ${
+                    feedback.type === 'positive' ? 'feedback-positive' :
+                    feedback.type === 'negative' ? 'feedback-negative' :
+                    'bg-white/5'
+                }`;
+                div.textContent = feedback.text;
+                feedbackList.appendChild(div);
+            });
+        }
+
+        // Highlight syllables based on accuracy
+        function highlightSyllables(accuracy) {
+            const syllables = document.querySelectorAll('.word-syllable');
+            syllables.forEach((syllable, index) => {
+                // Simulate individual syllable accuracy
+                const syllableAccuracy = Math.random() > 0.3 ? 'correct' : 'incorrect';
+                
+                if (syllableAccuracy === 'correct') {
+                    syllable.classList.add('syllable-correct');
+                } else {
+                    syllable.classList.add('syllable-incorrect');
+                }
+                
+                // Remove classes after animation
+                setTimeout(() => {
+                    syllable.classList.remove('syllable-correct', 'syllable-incorrect');
+                }, 2000);
+            });
+        }
+
+        // Try again
+        function tryAgain() {
+            document.getElementById('pronunciation-result').style.display = 'none';
+            // Reset syllable highlights
+            const syllables = document.querySelectorAll('.word-syllable');
+            syllables.forEach(syllable => {
+                syllable.classList.remove('syllable-correct', 'syllable-incorrect');
+            });
+        }
+
+        // Next word
+        function nextWord() {
+            speakingState.currentWord++;
+            if (speakingState.currentWord >= speakingState.pronunciationWords.length) {
+                completePronunciationPractice();
+            } else {
+                loadCurrentWord();
+                updatePronunciationProgress();
+            }
+        }
+
+        // Complete pronunciation practice
+        function completePronunciationPractice() {
+            const completionElement = document.createElement('div');
+            completionElement.className = 'fixed inset-0 bg-black/80 flex items-center justify-center z-50';
+            completionElement.innerHTML = `
+                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-12 text-center">
+                    <div class="text-8xl mb-6">🎉</div>
+                    <h2 class="text-4xl font-bold mb-4">Prática Concluída!</h2>
+                    <div class="text-xl text-gray-300 mb-8">Parabéns! Você completou todas as palavras!</div>
+                    <div class="grid grid-cols-3 gap-6 mb-8">
+                        <div>
+                            <div class="text-3xl font-bold text-green-400">${speakingState.pronunciationWords.length}</div>
+                            <div class="text-sm text-gray-300">Palavras Praticadas</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold text-blue-400">+150</div>
+                            <div class="text-sm text-gray-300">XP Ganho</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-bold text-purple-400">87%</div>
+                            <div class="text-sm text-gray-300">Precisão Média</div>
+                        </div>
+                    </div>
+                    <button onclick="goBackToDashboard()" class="bg-gradient-to-r from-green-500 to-blue-500 px-8 py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-600 transition-all">
+                        Continuar Praticando
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(completionElement);
+        }
+
+        // Select accent
+        function selectAccent(accent) {
+            speakingState.selectedAccent = accent;
+            
+            // Update UI
+            document.querySelectorAll('.accent-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update phonetic spelling based on accent
+            updatePhoneticSpelling();
+        }
+
+        // Update phonetic spelling based on accent
+        function updatePhoneticSpelling() {
+            const word = speakingState.pronunciationWords[speakingState.currentWord];
+            let phonetic = word.phonetic;
+            
+            // Simulate accent differences
+            if (speakingState.selectedAccent === 'british') {
+                phonetic = phonetic.replace(/ər/, 'ə');
+            } else if (speakingState.selectedAccent === 'australian') {
+                phonetic = phonetic.replace(/eɪ/, 'aɪ');
+            }
+            
+            document.getElementById('phonetic-spelling').textContent = phonetic;
+        }
+
+        // Other practice modes (placeholder functions)
+        function startTongueTwisters() {
+            alert('Trava-línguas em desenvolvimento! 🌪️\n\nEm breve você poderá praticar com:\n• She sells seashells by the seashore\n• Peter Piper picked a peck of pickled peppers\n• How much wood would a woodchuck chuck...');
+        }
+
+        function startConversationPractice() {
+            alert('Prática de conversação em desenvolvimento! 💬\n\nEm breve você poderá:\n• Praticar diálogos interativos\n• Responder perguntas em tempo real\n• Receber feedback sobre naturalidade');
+        }
+
+        function startReadingPractice() {
+            alert('Leitura em voz alta em desenvolvimento! 📖\n\nEm breve você poderá:\n• Ler textos com análise de fluência\n• Praticar entonação e ritmo\n• Receber feedback sobre expressividade');
+        }
+
+        function startDailyChallenge() {
+            alert('Desafio diário em desenvolvimento! 🏆\n\nEm breve você poderá:\n• Falar sobre tópicos específicos\n• Gravar apresentações de 5 minutos\n• Competir com outros usuários');
+        }
+
+        // Generate speaking exercises
+        function generateSpeakingExercises() {
+            const container = document.getElementById('speaking-exercises');
+            
+            const exercises = [
+                {
+                    title: 'Vogais Básicas',
+                    description: 'Pratique os sons /æ/, /ɪ/, /ʌ/',
+                    difficulty: 1,
+                    duration: '10 min',
+                    xp: 25,
+                    completed: true,
+                    category: 'pronunciation'
+                },
+                {
+                    title: 'Consoantes Difíceis',
+                    description: 'Sons /θ/, /ð/, /ʃ/, /ʒ/',
+                    difficulty: 3,
+                    duration: '15 min',
+                    xp: 50,
+                    completed: false,
+                    current: true,
+                    category: 'pronunciation'
+                },
+                {
+                    title: 'Linking Words',
+                    description: 'Conecte palavras naturalmente',
+                    difficulty: 2,
+                    duration: '12 min',
+                    xp: 35,
+                    completed: false,
+                    category: 'fluency'
+                },
+                {
+                    title: 'Stress Patterns',
+                    description: 'Acentuação em palavras longas',
+                    difficulty: 4,
+                    duration: '20 min',
+                    xp: 75,
+                    completed: false,
+                    category: 'pronunciation'
+                },
+                {
+                    title: 'Intonation Practice',
+                    description: 'Perguntas vs. afirmações',
+                    difficulty: 3,
+                    duration: '18 min',
+                    xp: 60,
+                    completed: false,
+                    category: 'intonation'
+                },
+                {
+                    title: 'Minimal Pairs',
+                    description: 'ship/sheep, bit/beat',
+                    difficulty: 2,
+                    duration: '14 min',
+                    xp: 40,
+                    completed: false,
+                    category: 'pronunciation'
+                }
+            ];
+            
+            exercises.forEach((exercise, index) => {
+                const exerciseCard = document.createElement('div');
+                let statusClass = '';
+                
+                if (exercise.completed) {
+                    statusClass = 'exercise-completed';
+                } else if (exercise.current) {
+                    statusClass = 'exercise-current';
+                } else if (index > 2) {
+                    statusClass = 'exercise-locked';
+                }
+                
+                const stars = '★'.repeat(exercise.difficulty) + '☆'.repeat(5 - exercise.difficulty);
+                
+                exerciseCard.className = `${statusClass} speaking-level-${exercise.difficulty <= 2 ? 'beginner' : exercise.difficulty <= 3 ? 'intermediate' : 'advanced'} bg-white/10 backdrop-blur-lg rounded-2xl p-6 speaking-exercise`;
+                exerciseCard.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="text-2xl">
+                            ${exercise.category === 'pronunciation' ? '🎯' : 
+                              exercise.category === 'fluency' ? '🌊' : '🎵'}
+                        </div>
+                        <div class="text-right">
+                            <div class="text-yellow-400 text-sm">${stars}</div>
+                            <div class="text-xs text-gray-400">Dificuldade</div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="text-lg font-bold mb-2">${exercise.title}</h4>
+                    <div class="text-sm text-gray-300 mb-4">${exercise.description}</div>
+                    
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-xs text-gray-400">
+                            ⏱️ ${exercise.duration}
+                        </div>
+                        <div class="text-xs text-yellow-400">
+                            +${exercise.xp} XP
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        ${exercise.completed ? 
+                            '<div class="text-green-400 font-bold">✅ Completo</div>' :
+                            exercise.current ?
+                                '<button class="bg-gradient-to-r from-blue-500 to-purple-500 px-4 py-2 rounded-lg font-bold text-sm hover:from-blue-600 hover:to-purple-600 transition-all">Continuar</button>' :
+                                index > 2 ?
+                                    '<div class="text-gray-500">🔒 Bloqueado</div>' :
+                                    '<button class="bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-2 rounded-lg font-bold text-sm hover:from-green-600 hover:to-emerald-600 transition-all">Começar</button>'
+                        }
+                    </div>
+                `;
+                
+                if (!exercise.completed && !exercise.current && index <= 2) {
+                    exerciseCard.onclick = () => startPronunciationPractice();
+                } else if (exercise.current) {
+                    exerciseCard.onclick = () => startPronunciationPractice();
+                }
+                
+                container.appendChild(exerciseCard);
+            });
+        }
+
+        // Navigation functions
+        function goBackToDashboard() {
+            // Remove completion screen if exists
+            const completionScreen = document.querySelector('.fixed.inset-0');
+            if (completionScreen) {
+                document.body.removeChild(completionScreen);
+            }
+            
+            document.getElementById('pronunciation-interface').style.display = 'none';
+            document.getElementById('speaking-dashboard').style.display = 'block';
+            speakingState.currentMode = 'dashboard';
+        }
+
+        function goBack() {
+            if (speakingState.currentMode !== 'dashboard') {
+                if (confirm('Tem certeza que deseja sair? Seu progresso pode ser perdido.')) {
+                    goBackToDashboard();
+                }
+            } else {
+                window.history.back();
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            generateSpeakingExercises();
+            
+            // Simulate real-time stats updates
+            setInterval(() => {
+                if (speakingState.currentMode === 'dashboard') {
+                    // Update speaking time
+                    const timeElement = document.getElementById('speaking-time');
+                    const currentTime = timeElement.textContent;
+                    const [hours, minutes] = currentTime.split('h ');
+                    const totalMinutes = parseInt(hours) * 60 + parseInt(minutes.replace('m', ''));
+                    const newTotalMinutes = totalMinutes + Math.floor(Math.random() * 2);
+                    const newHours = Math.floor(newTotalMinutes / 60);
+                    const newMinutes = newTotalMinutes % 60;
+                    timeElement.textContent = `${newHours}h ${newMinutes}m`;
+                }
+            }, 45000);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9760f4862073a672',t:'MTc1NjM1NDE4Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

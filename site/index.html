@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Mastery - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .level-badge {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                        <span class="text-2xl">🎓</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold">English Mastery</h1>
+                        <p class="text-blue-100">Sua jornada para a fluência</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="font-semibold">Maria Silva</p>
+                        <p class="text-blue-100 text-sm">Nível B1 Intermediário</p>
+                    </div>
+                    <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                        <span class="text-2xl">👩‍🎓</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Progress Overview -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Seu Progresso</h2>
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">Certificação B1 → B2</h3>
+                        <p class="text-gray-600">Progresso atual: 68% concluído</p>
+                    </div>
+                    <div class="relative w-24 h-24">
+                        <svg class="w-24 h-24 progress-ring" viewBox="0 0 36 36">
+                            <path class="text-gray-200" stroke="currentColor" stroke-width="3" fill="none"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="text-blue-600" stroke="currentColor" stroke-width="3" fill="none"
+                                stroke-dasharray="68, 100"
+                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <span class="text-xl font-bold text-blue-600">68%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-3">
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full transition-all duration-500"
+                        style="width: 68%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Certification Levels -->
+        <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Níveis de Certificação</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- B1 Level -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-l-4 border-green-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="level-badge text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            CONCLUÍDO
+                        </div>
+                        <span class="text-3xl">✅</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">B1</h3>
+                    <p class="text-gray-600 mb-4">Intermediário</p>
+                    <div class="space-y-2 text-sm text-gray-700">
+                        <p>• Conversas do dia a dia</p>
+                        <p>• Textos simples</p>
+                        <p>• Viagens e trabalho</p>
+                    </div>
+                    <button
+                        class="w-full mt-4 bg-green-100 text-green-700 py-2 rounded-lg font-semibold hover:bg-green-200 transition-colors">
+                        Revisar Conteúdo
+                    </button>
+                </div>
+
+                <!-- B2 Level -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                            EM PROGRESSO
+                        </div>
+                        <span class="text-3xl">📚</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">B2</h3>
+                    <p class="text-gray-600 mb-4">Intermediário Superior</p>
+                    <div class="space-y-2 text-sm text-gray-700">
+                        <p>• Textos complexos</p>
+                        <p>• Fluência em debates</p>
+                        <p>• Escrita detalhada</p>
+                    </div>
+                    <button
+                        class="w-full mt-4 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                        Continuar Estudos
+                    </button>
+                </div>
+
+                <!-- C1 Level -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-l-4 border-gray-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-gray-300 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            BLOQUEADO
+                        </div>
+                        <span class="text-3xl">🔒</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-400 mb-2">C1</h3>
+                    <p class="text-gray-400 mb-4">Avançado</p>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <p>• Textos longos e complexos</p>
+                        <p>• Expressão fluente</p>
+                        <p>• Uso acadêmico/profissional</p>
+                    </div>
+                    <button
+                        class="w-full mt-4 bg-gray-200 text-gray-500 py-2 rounded-lg font-semibold cursor-not-allowed">
+                        Complete B2 primeiro
+                    </button>
+                </div>
+
+                <!-- C2 Level -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 card-hover border-l-4 border-gray-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="bg-gray-300 text-gray-700 px-3 py-1 rounded-full text-sm font-semibold">
+                            BLOQUEADO
+                        </div>
+                        <span class="text-3xl">🔒</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-400 mb-2">C2</h3>
+                    <p class="text-gray-400 mb-4">Proficiência</p>
+                    <div class="space-y-2 text-sm text-gray-400">
+                        <p>• Compreensão total</p>
+                        <p>• Expressão precisa</p>
+                        <p>• Nível nativo</p>
+                    </div>
+                    <button
+                        class="w-full mt-4 bg-gray-200 text-gray-500 py-2 rounded-lg font-semibold cursor-not-allowed">
+                        Complete C1 primeiro
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Activities -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Today's Lesson -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Lição de Hoje</h3>
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 mb-4">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <span class="text-2xl">🎯</span>
+                        <div>
+                            <h4 class="font-semibold text-gray-900">Present Perfect Continuous</h4>
+                            <p class="text-gray-600 text-sm">Gramática • 25 minutos</p>
+                        </div>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-3">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: 40%"></div>
+                    </div>
+                    <p class="text-sm text-gray-600">Progresso: 2 de 5 exercícios</p>
+                </div>
+                <button
+                    class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all">
+                    Continuar Lição
+                </button>
+            </div>
+
+            <!-- Weekly Goals -->
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Metas da Semana</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-green-500">✅</span>
+                            <span class="text-gray-700">5 lições de gramática</span>
+                        </div>
+                        <span class="text-green-600 font-semibold">5/5</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-blue-500">📖</span>
+                            <span class="text-gray-700">3 textos de leitura</span>
+                        </div>
+                        <span class="text-blue-600 font-semibold">2/3</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-yellow-500">🎧</span>
+                            <span class="text-gray-700">4 exercícios de listening</span>
+                        </div>
+                        <span class="text-yellow-600 font-semibold">1/4</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <span class="text-purple-500">💬</span>
+                            <span class="text-gray-700">2 sessões de conversação</span>
+                        </div>
+                        <span class="text-purple-600 font-semibold">0/2</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-2xl shadow-lg p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-6">Ações Rápidas</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button
+                    class="flex flex-col items-center p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors card-hover">
+                    <span class="text-3xl mb-2">📝</span>
+                    <span class="font-semibold text-gray-700">Exercícios</span>
+                </button>
+                <button
+                    class="flex flex-col items-center p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors card-hover">
+                    <span class="text-3xl mb-2">🎧</span>
+                    <span class="font-semibold text-gray-700">Listening</span>
+                </button>
+                <button
+                    class="flex flex-col items-center p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors card-hover">
+                    <span class="text-3xl mb-2">💬</span>
+                    <span class="font-semibold text-gray-700">Conversação</span>
+                </button>
+                <button
+                    class="flex flex-col items-center p-4 bg-yellow-50 rounded-xl hover:bg-yellow-100 transition-colors card-hover">
+                    <span class="text-3xl mb-2">📊</span>
+                    <span class="font-semibold text-gray-700">Relatórios</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add interactive functionality
+        document.addEventListener('DOMContentLoaded', function () {
+            // Animate progress bars on load
+            const progressBars = document.querySelectorAll('[style*="width"]');
+            progressBars.forEach(bar => {
+                const width = bar.style.width;
+                bar.style.width = '0%';
+                setTimeout(() => {
+                    bar.style.width = width;
+                }, 500);
+            });
+
+            // Add click handlers for buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function () {
+                    if (!this.classList.contains('cursor-not-allowed')) {
+                        // Add click animation
+                        this.style.transform = 'scale(0.95)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 150);
+
+                        // Show feedback message
+                        const originalText = this.textContent;
+                        if (originalText.includes('Continuar')) {
+                            this.textContent = 'Carregando...';
+                            setTimeout(() => {
+                                this.textContent = originalText;
+                            }, 1000);
+                        }
+                    }
+                });
+            });
+
+            // Add hover effects for cards
+            const cards = document.querySelectorAll('.card-hover');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateY(-4px)';
+                });
+
+                card.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9760a8a2011a8e5a',t:'MTc1NjM1MTA3OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Battle - Desafio de Gramática</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 50%, #ff9ff3 100%); }
+        .battle-card { transition: all 0.3s ease; }
+        .battle-card:hover { transform: translateY(-8px) scale(1.02); }
+        
+        .correct-answer { 
+            animation: correctPulse 0.6s ease-out;
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            color: white !important;
+        }
+        
+        .wrong-answer { 
+            animation: wrongShake 0.5s ease-out;
+            background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+            color: white !important;
+        }
+        
+        .combo-effect {
+            animation: comboZoom 0.8s ease-out;
+        }
+        
+        .level-up {
+            animation: levelUpBounce 1s ease-out;
+        }
+        
+        .power-up-active {
+            animation: powerUpGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes correctPulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+        
+        @keyframes comboZoom {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes levelUpBounce {
+            0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+            40%, 43% { transform: translate3d(0, -15px, 0); }
+            70% { transform: translate3d(0, -7px, 0); }
+            90% { transform: translate3d(0, -2px, 0); }
+        }
+        
+        @keyframes powerUpGlow {
+            0%, 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6); }
+        }
+        
+        .timer-bar {
+            transition: width 0.1s linear;
+        }
+        
+        .timer-critical {
+            animation: timerPulse 0.5s ease-in-out infinite;
+        }
+        
+        @keyframes timerPulse {
+            0%, 100% { background-color: #ef4444; }
+            50% { background-color: #fca5a5; }
+        }
+        
+        .streak-counter {
+            background: linear-gradient(45deg, #f59e0b, #d97706);
+            animation: streakGlow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes streakGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .category-badge {
+            transition: all 0.3s ease;
+        }
+        
+        .category-badge:hover {
+            transform: scale(1.1);
+        }
+        
+        .explosion-effect {
+            animation: explosion 0.6s ease-out;
+        }
+        
+        @keyframes explosion {
+            0% { transform: scale(0); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen text-white">
+    <!-- Header -->
+    <header class="gradient-bg shadow-2xl">
+        <div class="max-w-6xl mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors">
+                        <span class="text-xl">←</span>
+                    </button>
+                    <div>
+                        <h1 class="text-3xl font-black flex items-center">
+                            ⚔️ GRAMMAR BATTLE
+                        </h1>
+                        <p class="text-red-100">Desafio de Gramática em Tempo Real</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-6">
+                    <!-- Lives -->
+                    <div class="text-center">
+                        <div class="flex space-x-1 mb-1" id="lives-display">
+                            <span class="text-2xl">❤️</span>
+                            <span class="text-2xl">❤️</span>
+                            <span class="text-2xl">❤️</span>
+                        </div>
+                        <div class="text-xs text-red-100">Vidas</div>
+                    </div>
+                    
+                    <!-- Score -->
+                    <div class="text-center">
+                        <div class="text-3xl font-black" id="score">0</div>
+                        <div class="text-xs text-red-100">Pontos</div>
+                    </div>
+                    
+                    <!-- Level -->
+                    <div class="text-center">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xl">🏆</span>
+                            <span class="text-3xl font-black" id="level">1</span>
+                        </div>
+                        <div class="text-xs text-red-100">Nível</div>
+                    </div>
+                    
+                    <!-- Streak -->
+                    <div class="text-center">
+                        <div class="streak-counter px-3 py-1 rounded-full">
+                            <span class="text-xl font-bold" id="streak">0</span>
+                            <span class="text-sm">🔥</span>
+                        </div>
+                        <div class="text-xs text-red-100">Sequência</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Category Selection (Initial State) -->
+        <div id="category-selection">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-black text-white mb-4">ESCOLHA SUA BATALHA</h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">
+                    Selecione uma categoria de gramática e prepare-se para o desafio! Cada categoria tem suas próprias armadilhas.
+                </p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+                <!-- Verb Tenses -->
+                <div class="battle-card bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl shadow-2xl p-8 cursor-pointer" onclick="startBattle('verbs')">
+                    <div class="text-center">
+                        <div class="text-7xl mb-6">⏰</div>
+                        <h3 class="text-2xl font-bold mb-4">Verb Tenses</h3>
+                        <p class="text-blue-100 mb-6">Past, Present, Future e Perfect Tenses</p>
+                        <div class="category-badge bg-blue-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                            INTERMEDIÁRIO
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Prepositions -->
+                <div class="battle-card bg-gradient-to-br from-green-600 to-green-800 rounded-3xl shadow-2xl p-8 cursor-pointer" onclick="startBattle('prepositions')">
+                    <div class="text-center">
+                        <div class="text-7xl mb-6">🎯</div>
+                        <h3 class="text-2xl font-bold mb-4">Prepositions</h3>
+                        <p class="text-green-100 mb-6">In, On, At, By, For, With...</p>
+                        <div class="category-badge bg-green-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                            INICIANTE
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Articles -->
+                <div class="battle-card bg-gradient-to-br from-purple-600 to-purple-800 rounded-3xl shadow-2xl p-8 cursor-pointer" onclick="startBattle('articles')">
+                    <div class="text-center">
+                        <div class="text-7xl mb-6">📝</div>
+                        <h3 class="text-2xl font-bold mb-4">Articles</h3>
+                        <p class="text-purple-100 mb-6">A, An, The - Uso correto</p>
+                        <div class="category-badge bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                            INICIANTE
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Conditionals -->
+                <div class="battle-card bg-gradient-to-br from-red-600 to-red-800 rounded-3xl shadow-2xl p-8 cursor-pointer" onclick="startBattle('conditionals')">
+                    <div class="text-center">
+                        <div class="text-7xl mb-6">🔥</div>
+                        <h3 class="text-2xl font-bold mb-4">Conditionals</h3>
+                        <p class="text-red-100 mb-6">If clauses - Zero, First, Second, Third</p>
+                        <div class="category-badge bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                            AVANÇADO
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Phrasal Verbs -->
+                <div class="battle-card bg-gradient-to-br from-yellow-600 to-orange-600 rounded-3xl shadow-2xl p-8 cursor-pointer" onclick="startBattle('phrasal')">
+                    <div class="text-center">
+                        <div class="text-7xl mb-6">💥</div>
+                        <h3 class="text-2xl font-bold mb-4">Phrasal Verbs</h3>
+                        <p class="text-yellow-100 mb-6">Get up, Look for, Turn on...</p>
+                        <div class="category-badge bg-orange-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                            AVANÇADO
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Mixed Challenge -->
+                <div class="battle-card bg-gradient-to-br from-pink-600 to-rose-800 rounded-3xl shadow-2xl p-8 cursor-pointer" onclick="startBattle('mixed')">
+                    <div class="text-center">
+                        <div class="text-7xl mb-6">🌟</div>
+                        <h3 class="text-2xl font-bold mb-4">Mixed Challenge</h3>
+                        <p class="text-pink-100 mb-6">Todas as categorias misturadas</p>
+                        <div class="category-badge bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-2 rounded-full text-sm font-bold">
+                            EXPERT
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Battle Interface (Hidden Initially) -->
+        <div id="battle-interface" style="display: none;">
+            <!-- Progress and Timer -->
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold" id="category-title">Verb Tenses Battle</h3>
+                    <div class="text-lg font-semibold">
+                        Questão <span id="question-number">1</span>/15
+                    </div>
+                </div>
+                
+                <!-- Timer Bar -->
+                <div class="w-full bg-gray-700 rounded-full h-4 mb-4">
+                    <div class="timer-bar bg-gradient-to-r from-green-500 to-yellow-500 h-4 rounded-full transition-all" id="timer-bar" style="width: 100%"></div>
+                </div>
+                
+                <!-- Level Progress -->
+                <div class="w-full bg-gray-700 rounded-full h-2">
+                    <div class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all" id="level-progress" style="width: 6.67%"></div>
+                </div>
+            </div>
+
+            <!-- Power-ups -->
+            <div class="flex justify-center space-x-4 mb-8">
+                <button onclick="usePowerUp('freeze')" id="freeze-btn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:opacity-50" disabled>
+                    ❄️ Freeze (0)
+                </button>
+                <button onclick="usePowerUp('double')" id="double-btn" class="bg-yellow-600 hover:bg-yellow-700 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:opacity-50" disabled>
+                    ⭐ 2x Points (0)
+                </button>
+                <button onclick="usePowerUp('life')" id="life-btn" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:opacity-50" disabled>
+                    ❤️ Extra Life (0)
+                </button>
+                <button onclick="usePowerUp('fifty')" id="fifty-btn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-xl font-bold text-sm transition-all disabled:opacity-50" disabled>
+                    🎯 50/50 (0)
+                </button>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white/10 backdrop-blur-lg rounded-3xl shadow-2xl p-8 mb-8">
+                <div class="text-center mb-8">
+                    <h4 class="text-3xl font-bold mb-4" id="question-text">
+                        Complete the sentence: "I _____ to the store yesterday."
+                    </h4>
+                    <p class="text-gray-300" id="question-hint">
+                        Choose the correct past tense form
+                    </p>
+                </div>
+                
+                <!-- Answer Options -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="answer-options">
+                    <!-- Options will be generated here -->
+                </div>
+            </div>
+
+            <!-- Combo Indicator -->
+            <div class="text-center" id="combo-indicator" style="display: none;">
+                <div class="combo-effect text-6xl font-black text-yellow-400 mb-2">
+                    COMBO x<span id="combo-multiplier">2</span>!
+                </div>
+                <div class="text-xl text-yellow-300">
+                    Pontos multiplicados!
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Screen (Hidden Initially) -->
+        <div id="results-screen" style="display: none;">
+            <div class="text-center">
+                <div class="text-8xl mb-6" id="result-emoji">🏆</div>
+                <h2 class="text-4xl font-black mb-4" id="result-title">BATALHA CONCLUÍDA!</h2>
+                <p class="text-xl text-gray-300 mb-8" id="result-message">Você dominou a gramática!</p>
+                
+                <div class="bg-white/10 backdrop-blur-lg rounded-3xl p-8 mb-8">
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                        <div>
+                            <div class="text-3xl font-black text-yellow-400" id="final-score">0</div>
+                            <div class="text-sm text-gray-300">Pontos Finais</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-black text-green-400" id="correct-answers">0</div>
+                            <div class="text-sm text-gray-300">Acertos</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-black text-blue-400" id="max-streak">0</div>
+                            <div class="text-sm text-gray-300">Maior Sequência</div>
+                        </div>
+                        <div>
+                            <div class="text-3xl font-black text-purple-400" id="final-level">1</div>
+                            <div class="text-sm text-gray-300">Nível Alcançado</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <button onclick="location.reload()" class="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-4 rounded-2xl font-bold text-lg hover:from-green-600 hover:to-blue-600 transition-all">
+                        Nova Batalha
+                    </button>
+                    <button onclick="goBack()" class="w-full bg-gray-600 hover:bg-gray-700 text-white py-4 rounded-2xl font-bold text-lg transition-all">
+                        Voltar ao Dashboard
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let battleState = {
+            category: null,
+            level: 1,
+            score: 0,
+            lives: 3,
+            streak: 0,
+            maxStreak: 0,
+            currentQuestion: 1,
+            totalQuestions: 15,
+            correctAnswers: 0,
+            timeLeft: 15,
+            timerInterval: null,
+            comboMultiplier: 1,
+            powerUps: {
+                freeze: 1,
+                double: 1,
+                life: 1,
+                fifty: 1
+            },
+            activePowerUps: {
+                freeze: false,
+                double: false
+            },
+            questions: {
+                verbs: [
+                    {
+                        question: "I _____ to the store yesterday.",
+                        options: ["go", "went", "going", "gone"],
+                        correct: 1,
+                        explanation: "Past simple tense for completed actions in the past."
+                    },
+                    {
+                        question: "She _____ been studying English for 3 years.",
+                        options: ["have", "has", "had", "having"],
+                        correct: 1,
+                        explanation: "Present perfect continuous with 'she' (third person singular)."
+                    },
+                    {
+                        question: "By next year, I _____ graduated from college.",
+                        options: ["will", "will have", "would", "would have"],
+                        correct: 1,
+                        explanation: "Future perfect tense for actions completed before a future time."
+                    }
+                ],
+                prepositions: [
+                    {
+                        question: "I'll meet you _____ the airport.",
+                        options: ["in", "at", "on", "by"],
+                        correct: 1,
+                        explanation: "'At' is used for specific locations like airports, stations."
+                    },
+                    {
+                        question: "The book is _____ the table.",
+                        options: ["in", "at", "on", "by"],
+                        correct: 2,
+                        explanation: "'On' is used for surfaces like tables, desks."
+                    }
+                ],
+                articles: [
+                    {
+                        question: "I saw _____ elephant at the zoo.",
+                        options: ["a", "an", "the", "no article"],
+                        correct: 1,
+                        explanation: "'An' is used before words starting with vowel sounds."
+                    },
+                    {
+                        question: "_____ sun rises in the east.",
+                        options: ["A", "An", "The", "No article"],
+                        correct: 2,
+                        explanation: "'The' is used with unique objects like the sun, moon."
+                    }
+                ],
+                conditionals: [
+                    {
+                        question: "If I _____ rich, I would travel the world.",
+                        options: ["am", "was", "were", "will be"],
+                        correct: 2,
+                        explanation: "Second conditional uses 'were' for all persons in the if-clause."
+                    },
+                    {
+                        question: "If it rains tomorrow, we _____ stay home.",
+                        options: ["will", "would", "could", "might"],
+                        correct: 0,
+                        explanation: "First conditional uses 'will' in the main clause."
+                    }
+                ],
+                phrasal: [
+                    {
+                        question: "Please _____ the lights when you leave.",
+                        options: ["turn off", "turn on", "turn up", "turn down"],
+                        correct: 0,
+                        explanation: "'Turn off' means to switch off lights or devices."
+                    },
+                    {
+                        question: "I need to _____ my homework before dinner.",
+                        options: ["give up", "put off", "carry out", "hand in"],
+                        correct: 2,
+                        explanation: "'Carry out' means to complete or perform a task."
+                    }
+                ]
+            }
+        };
+
+        // Start battle
+        function startBattle(category) {
+            battleState.category = category;
+            
+            // Hide category selection and show battle interface
+            document.getElementById('category-selection').style.display = 'none';
+            document.getElementById('battle-interface').style.display = 'block';
+            
+            // Update category title
+            const titles = {
+                verbs: 'Verb Tenses Battle',
+                prepositions: 'Prepositions Battle',
+                articles: 'Articles Battle',
+                conditionals: 'Conditionals Battle',
+                phrasal: 'Phrasal Verbs Battle',
+                mixed: 'Mixed Grammar Battle'
+            };
+            
+            document.getElementById('category-title').textContent = titles[category];
+            
+            // Start first question
+            loadQuestion();
+            startTimer();
+            updateUI();
+        }
+
+        // Load current question
+        function loadQuestion() {
+            const questions = battleState.questions[battleState.category] || battleState.questions.verbs;
+            const questionIndex = (battleState.currentQuestion - 1) % questions.length;
+            const question = questions[questionIndex];
+            
+            document.getElementById('question-text').textContent = question.question;
+            document.getElementById('question-hint').textContent = `Nível ${battleState.level} - ${battleState.category.toUpperCase()}`;
+            document.getElementById('question-number').textContent = battleState.currentQuestion;
+            
+            // Generate answer options
+            const optionsContainer = document.getElementById('answer-options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'bg-white/20 hover:bg-white/30 backdrop-blur-lg border-2 border-white/30 rounded-2xl p-6 text-xl font-bold transition-all transform hover:scale-105';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index, question.correct, question.explanation);
+                optionsContainer.appendChild(button);
+            });
+            
+            // Apply 50/50 power-up if active
+            if (battleState.activePowerUps.fifty) {
+                apply5050();
+                battleState.activePowerUps.fifty = false;
+            }
+        }
+
+        // Select answer
+        function selectAnswer(selectedIndex, correctIndex, explanation) {
+            // Stop timer
+            clearInterval(battleState.timerInterval);
+            
+            // Disable all buttons
+            const buttons = document.querySelectorAll('#answer-options button');
+            buttons.forEach(btn => btn.style.pointerEvents = 'none');
+            
+            const isCorrect = selectedIndex === correctIndex;
+            
+            if (isCorrect) {
+                // Correct answer
+                buttons[selectedIndex].className = 'correct-answer border-2 border-green-400 rounded-2xl p-6 text-xl font-bold';
+                
+                battleState.correctAnswers++;
+                battleState.streak++;
+                battleState.maxStreak = Math.max(battleState.maxStreak, battleState.streak);
+                
+                // Calculate points
+                let points = 100;
+                
+                // Time bonus
+                const timeBonus = Math.floor(battleState.timeLeft * 5);
+                points += timeBonus;
+                
+                // Streak bonus
+                if (battleState.streak >= 3) {
+                    battleState.comboMultiplier = Math.min(5, Math.floor(battleState.streak / 3) + 1);
+                    points *= battleState.comboMultiplier;
+                    showComboEffect();
+                }
+                
+                // Double points power-up
+                if (battleState.activePowerUps.double) {
+                    points *= 2;
+                    battleState.activePowerUps.double = false;
+                }
+                
+                battleState.score += points;
+                
+                // Level up check
+                if (battleState.currentQuestion % 3 === 0) {
+                    levelUp();
+                }
+                
+            } else {
+                // Wrong answer
+                buttons[selectedIndex].className = 'wrong-answer border-2 border-red-400 rounded-2xl p-6 text-xl font-bold';
+                buttons[correctIndex].className = 'correct-answer border-2 border-green-400 rounded-2xl p-6 text-xl font-bold';
+                
+                battleState.lives--;
+                battleState.streak = 0;
+                battleState.comboMultiplier = 1;
+                
+                if (battleState.lives <= 0) {
+                    setTimeout(() => endBattle(), 2000);
+                    return;
+                }
+            }
+            
+            updateUI();
+            
+            // Show explanation and continue
+            setTimeout(() => {
+                if (battleState.currentQuestion >= battleState.totalQuestions) {
+                    endBattle();
+                } else {
+                    nextQuestion();
+                }
+            }, 2000);
+        }
+
+        // Next question
+        function nextQuestion() {
+            battleState.currentQuestion++;
+            battleState.timeLeft = Math.max(10, 15 - battleState.level); // Decrease time as level increases
+            
+            loadQuestion();
+            startTimer();
+            updateUI();
+        }
+
+        // Start timer
+        function startTimer() {
+            if (battleState.activePowerUps.freeze) {
+                battleState.activePowerUps.freeze = false;
+                return;
+            }
+            
+            battleState.timerInterval = setInterval(() => {
+                battleState.timeLeft--;
+                
+                const percentage = (battleState.timeLeft / (15 - battleState.level + 10)) * 100;
+                const timerBar = document.getElementById('timer-bar');
+                timerBar.style.width = percentage + '%';
+                
+                // Change color based on time left
+                if (percentage > 50) {
+                    timerBar.className = 'timer-bar bg-gradient-to-r from-green-500 to-yellow-500 h-4 rounded-full transition-all';
+                } else if (percentage > 25) {
+                    timerBar.className = 'timer-bar bg-gradient-to-r from-yellow-500 to-orange-500 h-4 rounded-full transition-all';
+                } else {
+                    timerBar.className = 'timer-bar timer-critical h-4 rounded-full transition-all';
+                }
+                
+                if (battleState.timeLeft <= 0) {
+                    clearInterval(battleState.timerInterval);
+                    selectAnswer(-1, 0, "Time's up!"); // Force wrong answer
+                }
+            }, 1000);
+        }
+
+        // Power-ups
+        function usePowerUp(type) {
+            if (battleState.powerUps[type] <= 0) return;
+            
+            battleState.powerUps[type]--;
+            
+            switch(type) {
+                case 'freeze':
+                    battleState.activePowerUps.freeze = true;
+                    clearInterval(battleState.timerInterval);
+                    break;
+                case 'double':
+                    battleState.activePowerUps.double = true;
+                    break;
+                case 'life':
+                    battleState.lives = Math.min(3, battleState.lives + 1);
+                    break;
+                case 'fifty':
+                    battleState.activePowerUps.fifty = true;
+                    apply5050();
+                    break;
+            }
+            
+            updateUI();
+        }
+
+        // Apply 50/50 power-up
+        function apply5050() {
+            const buttons = document.querySelectorAll('#answer-options button');
+            const correctIndex = battleState.questions[battleState.category][(battleState.currentQuestion - 1) % battleState.questions[battleState.category].length].correct;
+            
+            let hiddenCount = 0;
+            buttons.forEach((button, index) => {
+                if (index !== correctIndex && hiddenCount < 2) {
+                    button.style.opacity = '0.3';
+                    button.style.pointerEvents = 'none';
+                    hiddenCount++;
+                }
+            });
+        }
+
+        // Show combo effect
+        function showComboEffect() {
+            const comboIndicator = document.getElementById('combo-indicator');
+            document.getElementById('combo-multiplier').textContent = battleState.comboMultiplier;
+            comboIndicator.style.display = 'block';
+            
+            setTimeout(() => {
+                comboIndicator.style.display = 'none';
+            }, 2000);
+        }
+
+        // Level up
+        function levelUp() {
+            battleState.level++;
+            
+            // Award power-ups
+            Object.keys(battleState.powerUps).forEach(key => {
+                battleState.powerUps[key]++;
+            });
+            
+            // Show level up effect
+            const levelElement = document.getElementById('level');
+            levelElement.className = 'text-3xl font-black level-up';
+            
+            setTimeout(() => {
+                levelElement.className = 'text-3xl font-black';
+            }, 1000);
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('score').textContent = battleState.score.toLocaleString();
+            document.getElementById('level').textContent = battleState.level;
+            document.getElementById('streak').textContent = battleState.streak;
+            
+            // Update lives
+            const livesDisplay = document.getElementById('lives-display');
+            livesDisplay.innerHTML = '';
+            for (let i = 0; i < 3; i++) {
+                const heart = document.createElement('span');
+                heart.className = 'text-2xl';
+                heart.textContent = i < battleState.lives ? '❤️' : '🖤';
+                livesDisplay.appendChild(heart);
+            }
+            
+            // Update level progress
+            const progress = (battleState.currentQuestion / battleState.totalQuestions) * 100;
+            document.getElementById('level-progress').style.width = progress + '%';
+            
+            // Update power-up buttons
+            Object.keys(battleState.powerUps).forEach(key => {
+                const btn = document.getElementById(key + '-btn');
+                const count = battleState.powerUps[key];
+                btn.textContent = btn.textContent.replace(/\(\d+\)/, `(${count})`);
+                btn.disabled = count <= 0;
+                
+                if (battleState.activePowerUps[key]) {
+                    btn.className = btn.className.replace('disabled:opacity-50', '') + ' power-up-active';
+                }
+            });
+        }
+
+        // End battle
+        function endBattle() {
+            clearInterval(battleState.timerInterval);
+            
+            // Hide battle interface and show results
+            document.getElementById('battle-interface').style.display = 'none';
+            document.getElementById('results-screen').style.display = 'block';
+            
+            // Update results
+            document.getElementById('final-score').textContent = battleState.score.toLocaleString();
+            document.getElementById('correct-answers').textContent = `${battleState.correctAnswers}/${battleState.totalQuestions}`;
+            document.getElementById('max-streak').textContent = battleState.maxStreak;
+            document.getElementById('final-level').textContent = battleState.level;
+            
+            // Determine result message
+            const accuracy = (battleState.correctAnswers / battleState.totalQuestions) * 100;
+            
+            if (accuracy >= 90) {
+                document.getElementById('result-emoji').textContent = '🏆';
+                document.getElementById('result-title').textContent = 'GRAMMAR MASTER!';
+                document.getElementById('result-message').textContent = 'Perfeição absoluta! Você domina a gramática!';
+            } else if (accuracy >= 70) {
+                document.getElementById('result-emoji').textContent = '🎉';
+                document.getElementById('result-title').textContent = 'EXCELENTE!';
+                document.getElementById('result-message').textContent = 'Ótimo desempenho! Continue praticando!';
+            } else if (accuracy >= 50) {
+                document.getElementById('result-emoji').textContent = '👍';
+                document.getElementById('result-title').textContent = 'BOM TRABALHO!';
+                document.getElementById('result-message').textContent = 'Você está no caminho certo!';
+            } else {
+                document.getElementById('result-emoji').textContent = '💪';
+                document.getElementById('result-title').textContent = 'CONTINUE TENTANDO!';
+                document.getElementById('result-message').textContent = 'A prática leva à perfeição!';
+            }
+        }
+
+        // Go back
+        function goBack() {
+            if (battleState.currentQuestion > 1) {
+                if (confirm('Tem certeza que deseja sair? Seu progresso será perdido.')) {
+                    window.history.back();
+                }
+            } else {
+                window.history.back();
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateUI();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9760c2cea07cd917',t:'MTc1NjM1MjE1MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

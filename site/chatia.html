@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Simulator - Prática de Conversação</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .chat-bubble {
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .typing-indicator {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .scenario-card {
+            transition: all 0.3s ease;
+        }
+
+        .scenario-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .message-user {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            margin-left: auto;
+            border-radius: 18px 18px 4px 18px;
+        }
+
+        .message-ai {
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            color: #374151;
+            margin-right: auto;
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        .suggestion-btn {
+            transition: all 0.2s ease;
+        }
+
+        .suggestion-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .ai-avatar {
+            transition: all 0.3s ease;
+        }
+
+        .ai-thinking .ai-avatar {
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        .fluency-bar {
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-green-50 via-blue-50 to-purple-100 min-h-screen">
+    <!-- Header -->
+    <header class="gradient-bg text-white shadow-xl">
+        <div class="max-w-6xl mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <button onclick="goBack()" class="bg-white/20 hover:bg-white/30 p-2 rounded-lg transition-colors">
+                        <span class="text-xl">←</span>
+                    </button>
+                    <div>
+                        <h1 class="text-2xl font-bold flex items-center">
+                            💬 Chat Simulator
+                        </h1>
+                        <p class="text-blue-100">Prática de Conversação com IA</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <!-- Fluency Score -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold" id="fluency-score">85</div>
+                        <div class="text-xs text-blue-100">Fluência</div>
+                    </div>
+
+                    <!-- Conversation Turns -->
+                    <div class="text-center">
+                        <div class="flex items-center space-x-1">
+                            <span class="text-xl">🔄</span>
+                            <span class="text-2xl font-bold" id="turn-count">0</span>
+                        </div>
+                        <div class="text-xs text-blue-100">Turnos</div>
+                    </div>
+
+                    <!-- Points -->
+                    <div class="text-center">
+                        <div class="text-2xl font-bold" id="points">0</div>
+                        <div class="text-xs text-blue-100">Pontos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Scenario Selection (Initial State) -->
+        <div id="scenario-selection" class="mb-8">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">Escolha um Cenário</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">
+                    Selecione uma situação para praticar sua conversação em inglês. A IA vai simular diálogos realistas!
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Restaurant -->
+                <div class="scenario-card bg-white rounded-2xl shadow-lg p-6 cursor-pointer"
+                    onclick="startScenario('restaurant')">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🍽️</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Restaurante</h3>
+                        <p class="text-gray-600 text-sm mb-4">Faça pedidos, converse com garçons e pratique vocabulário
+                            de comida</p>
+                        <div class="bg-orange-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            Iniciante
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Airport -->
+                <div class="scenario-card bg-white rounded-2xl shadow-lg p-6 cursor-pointer"
+                    onclick="startScenario('airport')">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">✈️</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Aeroporto</h3>
+                        <p class="text-gray-600 text-sm mb-4">Check-in, controle de passaporte e situações de viagem</p>
+                        <div class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            Intermediário
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Interview -->
+                <div class="scenario-card bg-white rounded-2xl shadow-lg p-6 cursor-pointer"
+                    onclick="startScenario('interview')">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">💼</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Entrevista</h3>
+                        <p class="text-gray-600 text-sm mb-4">Pratique entrevistas de emprego e linguagem profissional
+                        </p>
+                        <div class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            Avançado
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shopping -->
+                <div class="scenario-card bg-white rounded-2xl shadow-lg p-6 cursor-pointer"
+                    onclick="startScenario('shopping')">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🛍️</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Compras</h3>
+                        <p class="text-gray-600 text-sm mb-4">Pergunte preços, tamanhos e negocie em lojas</p>
+                        <div class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            Iniciante
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Doctor -->
+                <div class="scenario-card bg-white rounded-2xl shadow-lg p-6 cursor-pointer"
+                    onclick="startScenario('doctor')">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">👩‍⚕️</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Consulta Médica</h3>
+                        <p class="text-gray-600 text-sm mb-4">Descreva sintomas e entenda orientações médicas</p>
+                        <div class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            Intermediário
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hotel -->
+                <div class="scenario-card bg-white rounded-2xl shadow-lg p-6 cursor-pointer"
+                    onclick="startScenario('hotel')">
+                    <div class="text-center">
+                        <div class="text-6xl mb-4">🏨</div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Hotel</h3>
+                        <p class="text-gray-600 text-sm mb-4">Check-in, reclamações e serviços de hospedagem</p>
+                        <div class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold">
+                            Intermediário
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat Interface (Hidden Initially) -->
+        <div id="chat-interface" style="display: none;">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Chat Area -->
+                <div class="lg:col-span-3">
+                    <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+                        <!-- Chat Header -->
+                        <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <div
+                                        class="ai-avatar w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl">
+                                        🤖
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-lg" id="scenario-title">AI Assistant</h3>
+                                        <p class="text-blue-100 text-sm" id="scenario-context">Ready to help you
+                                            practice!</p>
+                                    </div>
+                                </div>
+                                <button onclick="endConversation()"
+                                    class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition-colors">
+                                    Finalizar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Messages Area -->
+                        <div class="h-96 overflow-y-auto p-6 space-y-4" id="messages-container">
+                            <!-- Messages will appear here -->
+                        </div>
+
+                        <!-- Typing Indicator -->
+                        <div id="typing-indicator" class="px-6 pb-2" style="display: none;">
+                            <div class="flex items-center space-x-2 text-gray-500">
+                                <div class="typing-indicator w-2 h-2 bg-gray-400 rounded-full"></div>
+                                <div class="typing-indicator w-2 h-2 bg-gray-400 rounded-full"
+                                    style="animation-delay: 0.2s;"></div>
+                                <div class="typing-indicator w-2 h-2 bg-gray-400 rounded-full"
+                                    style="animation-delay: 0.4s;"></div>
+                                <span class="text-sm ml-2">AI is typing...</span>
+                            </div>
+                        </div>
+
+                        <!-- Input Area -->
+                        <div class="border-t p-6">
+                            <div class="flex space-x-4">
+                                <input type="text" id="message-input" placeholder="Type your message in English..."
+                                    class="flex-1 border-2 border-gray-200 rounded-xl px-4 py-3 focus:outline-none focus:border-blue-500 transition-colors"
+                                    onkeypress="handleKeyPress(event)">
+                                <button onclick="sendMessage()"
+                                    class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-purple-700 transition-all">
+                                    Send
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="space-y-6">
+                    <!-- Quick Suggestions -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h4 class="font-bold text-gray-800 mb-4 flex items-center">
+                            💡 Sugestões Rápidas
+                        </h4>
+                        <div class="space-y-2" id="suggestions-container">
+                            <!-- Suggestions will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Fluency Meter -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6">
+                        <h4 class="font-bold text-gray-800 mb-4 flex items-center">
+                            📊 Medidor de Fluência
+                        </h4>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Gramática</span>
+                                    <span id="grammar-score">85%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="fluency-bar bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Vocabulário</span>
+                                    <span id="vocab-score">78%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="fluency-bar bg-blue-500 h-2 rounded-full" style="width: 78%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Naturalidade</span>
+                                    <span id="natural-score">92%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="fluency-bar bg-purple-500 h-2 rounded-full" style="width: 92%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips -->
+                    <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-2xl shadow-lg p-6">
+                        <h4 class="font-bold text-gray-800 mb-4 flex items-center">
+                            🎯 Dica Atual
+                        </h4>
+                        <p class="text-sm text-gray-700" id="current-tip">
+                            Try to use complete sentences and ask follow-up questions to keep the conversation flowing
+                            naturally.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        let chatState = {
+            currentScenario: null,
+            turnCount: 0,
+            points: 0,
+            fluencyScore: 85,
+            grammarScore: 85,
+            vocabScore: 78,
+            naturalScore: 92,
+            scenarios: {
+                restaurant: {
+                    title: "Restaurant Server",
+                    context: "Welcome to our restaurant! How can I help you?",
+                    emoji: "🍽️",
+                    initialMessage: "Good evening! Welcome to Bella Vista Restaurant. Do you have a reservation?",
+                    suggestions: [
+                        "I'd like a table for two, please.",
+                        "Can I see the menu?",
+                        "What do you recommend?",
+                        "I'm ready to order."
+                    ],
+                    tips: [
+                        "Use 'please' and 'thank you' to be polite",
+                        "Ask about ingredients if you have allergies",
+                        "Practice ordering drinks and appetizers"
+                    ]
+                },
+                airport: {
+                    title: "Airport Staff",
+                    context: "Airport check-in and assistance",
+                    emoji: "✈️",
+                    initialMessage: "Good morning! Welcome to the airport. Are you checking in for your flight today?",
+                    suggestions: [
+                        "Yes, I'm flying to New York.",
+                        "Where is gate B12?",
+                        "Is my flight on time?",
+                        "I need to change my seat."
+                    ],
+                    tips: [
+                        "Have your documents ready",
+                        "Ask about baggage allowance",
+                        "Learn airport vocabulary"
+                    ]
+                },
+                interview: {
+                    title: "HR Manager",
+                    context: "Job interview simulation",
+                    emoji: "💼",
+                    initialMessage: "Good afternoon! Thank you for coming in today. Please, have a seat. Can you tell me a bit about yourself?",
+                    suggestions: [
+                        "Thank you for this opportunity.",
+                        "I have 5 years of experience in...",
+                        "My greatest strength is...",
+                        "Do you have any questions for me?"
+                    ],
+                    tips: [
+                        "Speak confidently about your experience",
+                        "Prepare questions about the company",
+                        "Use professional language"
+                    ]
+                },
+                shopping: {
+                    title: "Store Assistant",
+                    context: "Shopping assistance",
+                    emoji: "🛍️",
+                    initialMessage: "Hi there! Welcome to our store. Are you looking for anything specific today?",
+                    suggestions: [
+                        "I'm looking for a blue shirt.",
+                        "Do you have this in size medium?",
+                        "How much does this cost?",
+                        "Can I try this on?"
+                    ],
+                    tips: [
+                        "Learn clothing sizes and colors",
+                        "Practice asking for different sizes",
+                        "Don't be afraid to negotiate prices"
+                    ]
+                },
+                doctor: {
+                    title: "Doctor",
+                    context: "Medical consultation",
+                    emoji: "👩‍⚕️",
+                    initialMessage: "Good morning! I'm Dr. Smith. What brings you in today? How are you feeling?",
+                    suggestions: [
+                        "I've been having headaches.",
+                        "I feel dizzy sometimes.",
+                        "How long should I take this medicine?",
+                        "When should I come back?"
+                    ],
+                    tips: [
+                        "Describe symptoms clearly",
+                        "Ask about side effects",
+                        "Learn body parts vocabulary"
+                    ]
+                },
+                hotel: {
+                    title: "Hotel Receptionist",
+                    context: "Hotel front desk service",
+                    emoji: "🏨",
+                    initialMessage: "Good evening! Welcome to Grand Hotel. How may I assist you today?",
+                    suggestions: [
+                        "I have a reservation under Smith.",
+                        "What time is breakfast served?",
+                        "The air conditioning isn't working.",
+                        "Can I get a late checkout?"
+                    ],
+                    tips: [
+                        "Be polite when making complaints",
+                        "Ask about hotel amenities",
+                        "Learn hotel service vocabulary"
+                    ]
+                }
+            }
+        };
+
+        // Start scenario
+        function startScenario(scenarioKey) {
+            chatState.currentScenario = scenarioKey;
+            const scenario = chatState.scenarios[scenarioKey];
+
+            // Hide scenario selection and show chat
+            document.getElementById('scenario-selection').style.display = 'none';
+            document.getElementById('chat-interface').style.display = 'block';
+
+            // Update chat header
+            document.getElementById('scenario-title').textContent = scenario.title;
+            document.getElementById('scenario-context').textContent = scenario.context;
+            document.querySelector('.ai-avatar').textContent = scenario.emoji;
+
+            // Add initial AI message
+            addMessage(scenario.initialMessage, 'ai');
+
+            // Update suggestions
+            updateSuggestions();
+            updateTip();
+
+            // Reset counters
+            chatState.turnCount = 0;
+            chatState.points = 0;
+            updateUI();
+        }
+
+        // Add message to chat
+        function addMessage(text, sender) {
+            const container = document.getElementById('messages-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-bubble flex ${sender === 'user' ? 'justify-end' : 'justify-start'}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = `message-${sender} max-w-xs lg:max-w-md px-4 py-3 text-sm`;
+            bubble.textContent = text;
+
+            messageDiv.appendChild(bubble);
+            container.appendChild(messageDiv);
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Send user message
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+
+            // Update turn count and points
+            chatState.turnCount++;
+            chatState.points += calculatePoints(message);
+            updateUI();
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            // Generate AI response
+            setTimeout(() => {
+                hideTypingIndicator();
+                const aiResponse = generateAIResponse(message);
+                addMessage(aiResponse, 'ai');
+                updateSuggestions();
+                updateFluencyScores(message);
+            }, 1500 + Math.random() * 1000);
+        }
+
+        // Handle enter key
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Calculate points based on message quality
+        function calculatePoints(message) {
+            let points = 5; // Base points
+
+            // Bonus for length
+            if (message.length > 20) points += 2;
+            if (message.length > 50) points += 3;
+
+            // Bonus for questions
+            if (message.includes('?')) points += 3;
+
+            // Bonus for polite words
+            const politeWords = ['please', 'thank you', 'excuse me', 'sorry'];
+            politeWords.forEach(word => {
+                if (message.toLowerCase().includes(word)) points += 2;
+            });
+
+            return points;
+        }
+
+        // Generate AI response based on scenario and user input
+        function generateAIResponse(userMessage) {
+            const scenario = chatState.scenarios[chatState.currentScenario];
+            const responses = {
+                restaurant: [
+                    "Certainly! Right this way to your table.",
+                    "Here's our menu. Today's special is grilled salmon.",
+                    "Would you like to start with some drinks?",
+                    "How would you like your steak cooked?",
+                    "Will that be all for today?"
+                ],
+                airport: [
+                    "Yes, let me check your booking. May I see your passport?",
+                    "Gate B12 is on the second floor, turn left after security.",
+                    "Your flight is on time, boarding starts at 3:30 PM.",
+                    "I can help you with that. What's your preference?",
+                    "Have a pleasant flight!"
+                ],
+                interview: [
+                    "That's great experience! Tell me about your biggest achievement.",
+                    "What interests you most about this position?",
+                    "How do you handle stressful situations?",
+                    "Do you have any questions about our company?",
+                    "Thank you for your time. We'll be in touch soon."
+                ],
+                shopping: [
+                    "Of course! Let me show you our selection.",
+                    "Yes, we have that in medium. Would you like to try it?",
+                    "This item is $45. We have a 20% discount today.",
+                    "The fitting rooms are right over there.",
+                    "Will you be paying by card or cash?"
+                ],
+                doctor: [
+                    "I see. How long have you been experiencing this?",
+                    "Let me examine you. Please sit on the table.",
+                    "I'm going to prescribe some medication for you.",
+                    "Take this twice a day with meals.",
+                    "Come back in two weeks if symptoms persist."
+                ],
+                hotel: [
+                    "Yes, I have your reservation. Here's your room key.",
+                    "Breakfast is served from 7 AM to 10 AM in the restaurant.",
+                    "I apologize for the inconvenience. I'll send maintenance right away.",
+                    "Certainly, I can arrange a 2 PM checkout for you.",
+                    "Is there anything else I can help you with?"
+                ]
+            };
+
+            const scenarioResponses = responses[chatState.currentScenario];
+            return scenarioResponses[Math.floor(Math.random() * scenarioResponses.length)];
+        }
+
+        // Update suggestions based on scenario
+        function updateSuggestions() {
+            const scenario = chatState.scenarios[chatState.currentScenario];
+            const container = document.getElementById('suggestions-container');
+            container.innerHTML = '';
+
+            scenario.suggestions.forEach(suggestion => {
+                const button = document.createElement('button');
+                button.className = 'suggestion-btn w-full text-left bg-blue-50 hover:bg-blue-100 p-3 rounded-lg text-sm text-blue-700 border border-blue-200';
+                button.textContent = suggestion;
+                button.onclick = () => {
+                    document.getElementById('message-input').value = suggestion;
+                    sendMessage();
+                };
+                container.appendChild(button);
+            });
+        }
+
+        // Update tip
+        function updateTip() {
+            const scenario = chatState.scenarios[chatState.currentScenario];
+            const tips = scenario.tips;
+            const randomTip = tips[Math.floor(Math.random() * tips.length)];
+            document.getElementById('current-tip').textContent = randomTip;
+        }
+
+        // Update fluency scores based on message analysis
+        function updateFluencyScores(message) {
+            // Simple scoring logic (in real app, use NLP)
+            const words = message.split(' ').length;
+            const hasQuestion = message.includes('?');
+            const hasPoliteWords = ['please', 'thank you'].some(word =>
+                message.toLowerCase().includes(word)
+            );
+
+            // Adjust scores slightly
+            if (words > 5) chatState.grammarScore = Math.min(100, chatState.grammarScore + 1);
+            if (words > 10) chatState.vocabScore = Math.min(100, chatState.vocabScore + 1);
+            if (hasQuestion || hasPoliteWords) chatState.naturalScore = Math.min(100, chatState.naturalScore + 1);
+
+            // Update UI
+            document.getElementById('grammar-score').textContent = chatState.grammarScore + '%';
+            document.getElementById('vocab-score').textContent = chatState.vocabScore + '%';
+            document.getElementById('natural-score').textContent = chatState.naturalScore + '%';
+
+            // Update bars
+            document.querySelectorAll('.fluency-bar')[0].style.width = chatState.grammarScore + '%';
+            document.querySelectorAll('.fluency-bar')[1].style.width = chatState.vocabScore + '%';
+            document.querySelectorAll('.fluency-bar')[2].style.width = chatState.naturalScore + '%';
+        }
+
+        // Show/hide typing indicator
+        function showTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'block';
+            document.querySelector('.ai-avatar').parentElement.classList.add('ai-thinking');
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'none';
+            document.querySelector('.ai-avatar').parentElement.classList.remove('ai-thinking');
+        }
+
+        // Update UI elements
+        function updateUI() {
+            document.getElementById('fluency-score').textContent = Math.round((chatState.grammarScore + chatState.vocabScore + chatState.naturalScore) / 3);
+            document.getElementById('turn-count').textContent = chatState.turnCount;
+            document.getElementById('points').textContent = chatState.points;
+        }
+
+        // End conversation
+        function endConversation() {
+            if (confirm('Are you sure you want to end this conversation?')) {
+                showConversationSummary();
+            }
+        }
+
+        // Show conversation summary
+        function showConversationSummary() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h3 class="text-2xl font-bold text-gray-800 mb-4">Conversation Complete!</h3>
+                    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl p-6 mb-6">
+                        <div class="grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">${chatState.turnCount}</div>
+                                <div class="text-sm text-gray-600">Conversation Turns</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-green-600">${chatState.points}</div>
+                                <div class="text-sm text-gray-600">Points Earned</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <button onclick="location.reload()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-xl font-semibold">
+                            Try Another Scenario
+                        </button>
+                        <button onclick="goBack()" class="w-full bg-gray-200 text-gray-700 py-3 rounded-xl font-semibold">
+                            Back to Dashboard
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Go back
+        function goBack() {
+            window.history.back();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            updateUI();
+        });
+    </script>
+    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'9760bc7f5389d917',t:'MTc1NjM1MTg5Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+</body>
+
+</html>
