@@ -1,0 +1,258 @@
+# =====================================================
+# CONFIGURAÇÕES DO EXTRACTOR B1
+# =====================================================
+
+# Configurações de Extração
+extraction:
+  # Formatos de arquivo suportados
+  supported_formats:
+    - ".pdf"
+    - ".docx"
+    - ".pptx"
+    - ".xlsx"
+    - ".html"
+    - ".txt"
+    - ".png"
+    - ".jpg"
+    - ".jpeg"
+  
+  # Tamanho máximo de arquivo (MB)
+  max_file_size_mb: 100
+  
+  # Recursos de extração
+  extract_images: true
+  extract_tables: true
+  extract_structure: true
+  extract_metadata: true
+  
+  # Configurações de OCR (se disponível)
+  ocr_enabled: false
+  ocr_language: "eng"
+  
+  # Configurações de processamento paralelo
+  max_workers: 4
+  chunk_size: 10
+
+# Configurações de Processamento
+processing:
+  # Critérios de qualidade
+  min_word_length: 2
+  min_definition_length: 10
+  min_rule_name_length: 5
+  min_description_length: 20
+  
+  # Recursos automáticos
+  auto_categorize: true
+  generate_examples: true
+  detect_language: true
+  
+  # Configurações de categorização
+  vocabulary_categories:
+    - "family"
+    - "food"
+    - "jobs"
+    - "weather"
+    - "transport"
+    - "house"
+    - "animals"
+    - "environment"
+    - "technology"
+    - "general"
+  
+  grammar_categories:
+    - "tenses"
+    - "conditionals"
+    - "modals"
+    - "prepositions"
+    - "articles"
+    - "pronouns"
+    - "adjectives"
+    - "adverbs"
+    - "general"
+
+# Configurações de Validação
+validation:
+  # Modo de validação
+  strict_mode: false
+  
+  # Critérios de qualidade
+  min_quality_score: 70.0
+  max_issues_per_item: 5
+  require_examples: false
+  
+  # Validações específicas
+  validate_vocabulary: true
+  validate_grammar: true
+  validate_reading: true
+  validate_listening: true
+  validate_writing: true
+  validate_speaking: true
+  
+  # Configurações de duplicatas
+  check_duplicates: true
+  duplicate_threshold: 0.8
+
+# Configurações de Exportação
+export:
+  # Formatos de saída
+  formats:
+    - "json"
+    - "sql"
+    - "csv"
+    - "postgresql"
+  
+  # Opções de exportação
+  include_metadata: true
+  compress_output: false
+  backup_original: true
+  
+  # Configurações de banco de dados
+  database:
+    host: "localhost"
+    port: 5432
+    database: "english_b1_platform"
+    username: "postgres"
+    password: ""
+  
+  # Configurações de arquivo
+  file:
+    encoding: "utf-8"
+    date_format: "%Y-%m-%d %H:%M:%S"
+    number_format: "%.2f"
+
+# Configurações de Logging
+logging:
+  # Nível de log
+  level: "INFO"
+  
+  # Formato de log
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} | {message}"
+  
+  # Destinos de log
+  file_logging: true
+  console_logging: true
+  
+  # Configurações de arquivo
+  file:
+    max_size: "10 MB"
+    retention: "7 days"
+    compression: true
+  
+  # Configurações de console
+  console:
+    colors: true
+    timestamp: true
+
+# Configurações de Performance
+performance:
+  # Configurações de memória
+  max_memory_usage_mb: 2048
+  memory_cleanup_threshold: 0.8
+  
+  # Configurações de cache
+  enable_cache: true
+  cache_size: 1000
+  cache_ttl: 3600
+  
+  # Configurações de processamento
+  batch_size: 100
+  max_retries: 3
+  retry_delay: 1
+
+# Configurações de IA e Processamento de Linguagem
+ai:
+  # Configurações de modelo
+  model_type: "local"  # local, remote, hybrid
+  
+  # Configurações de tradução
+  translation:
+    enabled: false
+    source_language: "en"
+    target_language: "pt"
+    provider: "google"  # google, deepL, azure
+  
+  # Configurações de análise
+  analysis:
+    sentiment_analysis: false
+    topic_modeling: false
+    keyword_extraction: true
+  
+  # Configurações de geração
+  generation:
+    examples: true
+    questions: true
+    explanations: true
+
+# Configurações de Segurança
+security:
+  # Validação de arquivos
+  validate_file_types: true
+  scan_for_malware: false
+  
+  # Configurações de acesso
+  access_control: false
+  allowed_ips: []
+  
+  # Configurações de dados
+  data_encryption: false
+  anonymize_data: false
+
+# Configurações de Notificações
+notifications:
+  # Configurações de email
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    username: ""
+    password: ""
+    from_address: ""
+    to_addresses: []
+  
+  # Configurações de webhook
+  webhook:
+    enabled: false
+    url: ""
+    headers: {}
+  
+  # Configurações de sistema
+  system:
+    success_notifications: true
+    error_notifications: true
+    progress_updates: true
+
+# Configurações de Backup
+backup:
+  # Configurações automáticas
+  auto_backup: true
+  backup_interval_hours: 24
+  
+  # Configurações de armazenamento
+  storage:
+    local: true
+    cloud: false
+    compression: true
+  
+  # Configurações de retenção
+  retention:
+    days: 30
+    max_backups: 10
+
+# Configurações de Monitoramento
+monitoring:
+  # Métricas de sistema
+  system_metrics: true
+  performance_metrics: true
+  error_tracking: true
+  
+  # Configurações de alertas
+  alerts:
+    memory_usage: 80
+    cpu_usage: 80
+    disk_usage: 90
+  
+  # Configurações de relatórios
+  reports:
+    daily: true
+    weekly: true
+    monthly: true
